@@ -1,17 +1,32 @@
 plot.dctable <-
-function(x, which = 1:length(x), position = "topright", box.cex = 0.75, ...)
+function(x, which = 1:length(x), type=c("all", "var", "logvar"), position = "topright", box.cex = 0.75, ...)
 {
-    plot1 <- function(param, show.legend, ...) {
+    plotit <- function(param, show.legend, ...) {
         y <- x[[param]]
         xlim <- range(xval - w/2, xval + w/2)
-        ylim <- range(y[,"2.5%"], y[,"97.5%"], y$mean - y$sd, y$mean + y$sd)
         pch <- rep(21, nrow(y))
         if (!is.null(y$r.hat)) {
             pch[y$r.hat < crit] <- 19
         }
-        plot(xval, y$mean, ylim=ylim, xlim=xlim, pch=pch, type = "b", lty=2,
-            xlab = "Number of clones", ylab="Estimate",
-            main = param, axes = FALSE, ...)
+        if (type=="all") {
+            ylim <- range(y[,"2.5%"], y[,"97.5%"], y$mean - y$sd, y$mean + y$sd)
+            plot(xval, y$mean, ylim=ylim, xlim=xlim, pch=pch, type = "b", lty=2,
+                xlab = "Number of clones", ylab="Estimate",
+                main = param, axes = FALSE, ...)
+        } else {
+            FUN <- switch(type,
+                "var" = function(x) return(x),
+                "logvar" = function(x) log(x))
+            ylim <- switch(type,
+                "var" = range(0, 1, y$sd^2/y$sd[1]^2),
+                "logvar" = range(0, log(y$sd^2/y$sd[1]^2)))
+            ylab <- switch(type,
+                "var" = "Scaled Variance",
+                "logvar" = "log(Scaled Variance)")
+            plot(xval, FUN(y$sd^2/y$sd[1]^2), ylim=ylim, xlim=xlim, pch=pch, type = "b", lty=1,
+                xlab = "Number of clones", ylab=ylab,
+                main = param, axes = FALSE, ...)
+        }
         axis(1, xval, k)
         axis(2)
         box()
@@ -20,13 +35,19 @@ function(x, which = 1:length(x), position = "topright", box.cex = 0.75, ...)
                 legend=c(paste("R.hat >= ", round(crit, 1), sep=""),
                 paste("R.hat < ", round(crit, 1), sep="")))
         }
-        errlines(xval, cbind(y$mean - y$sd, y$mean + y$sd))
-        errlines(xval, cbind(y[,"25%"], y[,"50%"]), width=w, code=3, type="b")
-        errlines(xval, cbind(y[,"50%"], y[,"75%"]), width=w, code=3, type="b")
-        points(xval, y[,"2.5%"], pch="x")
-        points(xval, y[,"97.5%"], pch="x")
+        if (type=="all") {
+            errlines(xval, cbind(y$mean - y$sd, y$mean + y$sd))
+            errlines(xval, cbind(y[,"25%"], y[,"50%"]), width=w, code=3, type="b")
+            errlines(xval, cbind(y[,"50%"], y[,"75%"]), width=w, code=3, type="b")
+            points(xval, y[,"2.5%"], pch="x")
+            points(xval, y[,"97.5%"], pch="x")
+        } else {
+            lines(xval, FUN(kmin/k), lty=2)
+        }
     }
+    type <- match.arg(type)
     k <- x[[1]]$n.clones
+    kmin <- min(k)
     xval <- 1:length(k)
     crit <- getOption("dclone.crit")["rhat"]
     nam <- names(x)[which]
@@ -41,7 +62,7 @@ function(x, which = 1:length(x), position = "topright", box.cex = 0.75, ...)
     }
     opar <- par(mfrow=c(nr, nc))
     for (i in 1:m) {
-        plot1(nam[i], nam[i] == nam[m], ...)
+        plotit(nam[i], nam[i] == nam[m], ...)
     }
     par(opar)
     invisible(NULL)

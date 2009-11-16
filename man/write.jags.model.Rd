@@ -4,10 +4,10 @@
 \alias{write.jags.model}
 \alias{clean.jags.model}
 \title{
-Remove JAGS model from hard drive
+Write and remove model file
 }
 \description{
-Removes a (JAGS model) file from the hard drive.
+Writes or removes a BUGS model file to or from the hard drive.
 }
 \usage{
 write.jags.model(model, filename = "model.bug", dir = getwd(), n = 5)
@@ -42,6 +42,7 @@ ideally via the \code{\link{on.exit}} function.
 \value{
 \code{write.jags.model} invisibly returns the name of the file
 that was written eventually (possibly including random string).
+The function tries to avoid overwriting existing files.
 
 \code{clean.jags.model} invisibly returns the result of 
 \code{\link{file.remove}} (logical).
@@ -74,7 +75,7 @@ alpha <- 1
 beta <- -1
 sigma <- 0.5
 x <- runif(N)
-linpred <- model.matrix(~x) %*% c(alpha, beta)
+linpred <- model.matrix(~x) \%*\% c(alpha, beta)
 Y <- rnorm(N, mean = linpred, sd = sigma)
 ## list of data for the model
 jdata <- list(N = N, Y = Y, x = x)

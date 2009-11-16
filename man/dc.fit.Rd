@@ -1,26 +1,18 @@
 \name{dc.fit}
 \Rdversion{1.1}
 \alias{dc.fit}
-\alias{dctable}
-\alias{dctable.default}
-\alias{plot.dctable}
 \title{
-Iterative Algorithm for Testing Data Cloning Convergence
+Iterative model fitting with data cloning
 }
 \description{
 \code{\link{jags.fit}} is iteratively used to fit a model with
-increasing the number of clones used until data cloning convergence
-is reached.
+increasing the number of clones.
 }
 \usage{
 dc.fit(data, params, model, inits, n.clones, 
 multiply = NULL, unchanged = NULL, 
 update = NULL, updatefun = NULL, initsfun = NULL,
 trace = 1, flavour = c("jags", "bugs"), ...)
-dctable(x, ...)
-\method{dctable}{default}(x, ...)
-\method{plot}{dctable}(x, which = 1:length(x), 
-position="topright", box.cex = 0.75, ...)
 }
 \arguments{
   \item{data}{
@@ -54,14 +46,14 @@ is for making priors more informative, and anhancing convergence.
 See Details and Examples.
 }
   \item{updatefun}{
-A function to use for updating \code{data[[update]]}. It should take and 'mcmc.list' object as argument.
+A function to use for updating \code{data[[update]]}. It should take an 'mcmc.list' object as argument.
 See Details and Examples.
 }
   \item{initsfun}{
 A function to use for generating initial values, \code{inits} are updated by the object
 returned by this function from the second iteration. If initial values
 are not dependent on the previous iteration, this should be \code{NULL}, otherwise,
-it should take and 'mcmc.list' object as argument. See Examples.
+it should take an 'mcmc.list' object as argument. See Examples.
 }
   \item{trace}{
   If positive, information is printed during the running of the iterations.
@@ -69,19 +61,6 @@ it should take and 'mcmc.list' object as argument. See Examples.
 }
   \item{flavour}{
   If \code{"jags"}, the function \code{\link{jags.fit}} is called. If \code{"bugs"}, the function \code{\link{bugs.fit}} is called.
-}
-  \item{x}{
-  An MCMC or a 'dctable' object.
-}
-  \item{which}{
-  What to plot, character names or integer indices of the estimated parameters
-  are accepted.
-}
-  \item{position}{
-  Position for the legend, as for \code{\link{legend}}.
-}
-  \item{box.cex}{
-  Scaling factor for the interquartile boxes.
 }
   \item{\dots}{
   Other values supplied to \code{\link{jags.fit}}, or \code{\link{bugs.fit}}, depending on the \code{flavour} argument.
@@ -92,13 +71,7 @@ The function fits a JAGS/BUGS model with increasing numbers of clones, as suppli
 the argument \code{k}. Data cloning is done by the function \code{dclone} using
 the arguments \code{multiply} and \code{unchanged}.
 
-\code{dctable} returns the \code{"dctable"} attribute of the MCMC object.
-This attribute is created during the iterative data cloning process,
-to store statistics for the sampled parameters,
-because only the last MCMC object is kept. This way, there is a track of
-changes in the estimates.
-
-FIXME !!! Add UPDATE and inits details !!! 
+An updating function can be provided, see Examples.
 }
 \value{
 An object inheriting from the class 'mcmc.list'.
@@ -110,14 +83,13 @@ ecological models using Bayesian Markov chain Monte Carlo  methods.
 \emph{Ecology Letters} \strong{10}, 551--563.
 }
 \author{
-Khurram Nadeem, \email{knadeem@math.ualberta.ca}
-
-\enc{P\'eter S\'olymos}{Peter Solymos}, \email{solymos@ualberta.ca}
+\enc{P\'eter S\'olymos}{Peter Solymos}, \email{solymos@ualberta.ca}, 
+implementation is based on many discussions with Khurram Nadeem and Subhash Lele.
 }
 \seealso{
-Data cloning: \code{\link{dclone}}
-
-Model fitting: \code{\link{jags.fit}}
+Data cloning: \code{\link{dclone}}. \
+Model fitting: \code{\link{jags.fit}}, \code{\link{bugs.fit}}
+Convergence diagnostics: \code{\link{dctable}}
 }
 \examples{
 \dontrun{
@@ -129,7 +101,7 @@ sigma <- 0.1
 alpha <- rnorm(n, 0, sigma)
 x <- runif(n)
 X <- model.matrix(~x)
-linpred <- X %*% beta + alpha
+linpred <- X \%*\% beta + alpha
 Y <- rpois(n, exp(linpred))
 ## JAGS model as a function
 jfun1 <- function() {
@@ -180,8 +152,6 @@ dcmod <- dc.fit(updat, c("beta", "sigma"), glmm.model.up,
     n.clones = 1:5, multiply = "n", unchanged = "p",
     update = "priors", updatefun = upfun)
 summary(dcmod)
-dct <- dctable(dcmod)
-plot(dct)
 ## time series example
 ## data and model taken from Ponciano et al. 2009
 ## Ecology 90, 356-362.
@@ -206,14 +176,13 @@ beverton.holt <- function() {
     lambda <- tmp + 1
     mu0 <- log(2)  + log(lambda) - log(1 + beta * 2)
 }
-mod <- jags.dclone(dat, c("lambda","beta","sigma"), beverton.holt,
+mod <- dc.fit(dat, c("lambda","beta","sigma"), beverton.holt,
     n.clones=c(2, 5, 10), multiply="ncl", unchanged="n")
 ## compare with results from the paper:
 ##   beta   = 0.00235
 ##   lambda = 2.274
 ##   sigma  = 0.1274
 summary(mod)
-## FIXME: initsfun example
 }
 }
 \keyword{ models }
