@@ -76,17 +76,17 @@ except for \code{codaPkg} are passed also, most notably the ones to set up burn-
 }
 \value{
 By default, an \code{mcmc.list} object. If data cloning is used via the 
-\code{data} argument, \code{summary(jags.fit)} returns a modified summary
+\code{data} argument, \code{summary} returns a modified summary
 containing scaled data cloning standard errors (scaled by \code{sqrt(n.clones)}),
 and \eqn{R_{hat}} values (as returned by \code{\link[coda]{gelman.diag}}).
 
-\code{bugs.fit} returns a \code{bugs} object if \code{format = "bugs"}.
+\code{bugs.fit} can return a \code{bugs} object if \code{format = "bugs"}.
 In this case, printing is not changed, but the number of clones used is attached as attribute
 and can be retrieved by the function \code{\link{nclones}}.
 
 The function \code{as.mcmc.list.bugs} converts a 'bugs' object into 'mcmc.list'.
 Default behaviour of \code{n.thin} can cause problems in conversion when \code{program = "openbugs"}
-and \code{format = "mcmc.list"}, thus \code{n.thin = 1} is advised.
+and \code{format = "mcmc.list"}, thus \code{n.thin = 1} is advised in such cases.
 }
 \author{
 \enc{P\'eter S\'olymos}{Peter Solymos}, \email{solymos@ualberta.ca}
@@ -118,7 +118,7 @@ alpha <- 1
 beta <- -1
 sigma <- 0.5
 x <- runif(N)
-linpred <- model.matrix(~x) %*% c(alpha, beta)
+linpred <- model.matrix(~x) \%*\% c(alpha, beta)
 Y <- rnorm(N, mean = linpred, sd = sigma)
 ## list of data for the model
 jdata <- list(N = N, Y = Y, x = x)
