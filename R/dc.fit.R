@@ -1,16 +1,22 @@
+## stop.if.converged = FALSE arg to break when all dcdiag criteria are met
 dc.fit <- 
 function(data, params, model, inits, n.clones, multiply=NULL, unchanged=NULL, 
-update=NULL, updatefun=NULL, initsfun=NULL, trace=1, flavour = c("jags", "bugs"), ...)
+update=NULL, updatefun=NULL, initsfun=NULL, flavour = c("jags", "bugs"), ...)
 {
     ## initail evals
     flavour <- match.arg(flavour)
+    if (missing(n.clones))
+        stop("'n.clones' argument must be provided")
     if (identical(n.clones, 1))
         stop("'n.clones = 1' gives the Bayesian answer, no need for DC")
+    if (is.environment(data))
+        stop("'data' should be list, not environment")
     ## determine k
     k <- n.clones[order(n.clones)]
     k <- unique(k)
     times <- length(k)
-    crit <- getOption("dclone.crit")
+    rhat.crit <- getOption("dclone.rhat")
+    trace <- getOption("dclone.verbose")
     ## evaluate updating
     if (!is.null(update) != !is.null(updatefun))
         stop("both 'update' and 'updatefun' must be provided")
@@ -23,22 +29,27 @@ update=NULL, updatefun=NULL, initsfun=NULL, trace=1, flavour = c("jags", "bugs")
         inits <- NULL
     if (!is.null(initsfun))
         initsfun <- match.fun(initsfun)
+    ## list for dcdiag results
+    dcdr <- list()
     ## iteration starts here
     for (i in 1:times) {
         tmpch <- if (k[i] == 1) "clone" else "clones"
-        if (trace)
+        if (trace) {
             cat("\nFitting model with", k[i], tmpch, "\n\n")
+            flush.console()
+        }
         jdat <- dclone(data, k[i], multiply=multiply, unchanged=unchanged)
         mod <- if (flavour == "jags") {
             jags.fit(jdat, params, model, inits, ...)
         } else {
-            bugs.fit(jdat, params, model, inits, format="mcmc.list", DIC=FALSE, ...)
+            bugs.fit(jdat, params, model, inits, format="mcmc.list", ...)
         }
         ## dctable evaluation
         if (i == 1) {
             vn <- varnames(mod)
-            nch <- nchain(mod)
             dcts <- list()
+            ## note: quantiles must remain unchanged, because these values are
+            ## defined in extractdctable.default
             quantiles <- c(0.025, 0.25, 0.5, 0.75, 0.975)
             dcts0 <- matrix(0, times, 4 + length(quantiles))
             dcts0[,1] <- k
@@ -51,17 +62,24 @@ update=NULL, updatefun=NULL, initsfun=NULL, trace=1, flavour = c("jags", "bugs")
             if (!is.null(initsfun))
                 inits <- initsfun(mod)
         }
-        dctmp <- extractdctable.default(mod, quantiles = quantiles)
+        dctmp <- extractdctable.default(mod)
+        dcdr[[i]] <- extractdcdiag.default(mod)
         for (j in 1:length(vn)) {
             dcts[[j]][i,-1] <- dctmp[j,]
         }
     }
     ## warning if R.hat < crit
-    if (nch > 1 && any(dctmp[,"r.hat"] >= crit["rhat"]))
+    if (nchain(mod) > 1 && any(dctmp[,"r.hat"] >= rhat.crit))
         warning("chains convergence problem, see R.hat values")
     ## finalizing dctable attribute
     dcts <- lapply(dcts, function(z) as.data.frame(z))
     class(dcts) <- "dctable"
     attr(mod, "dctable") <- dcts
+    ## finalizing dcdiag attribute
+    dcd <- t(as.data.frame(dcdr))
+    rownames(dcd) <- 1:length(dcdr)
+    dcd <- data.frame(dcd)
+    class(dcd) <- c("dcdiag", class(dcd))
+    attr(mod, "dcdiag") <- dcd
     mod
 }

@@ -1,0 +1,59 @@
+dclone package version history
+
+Version 1.1-0, May 3, 2010
+    * dclone was tested with JAGS 2.0.
+    * major release submitted to CRAN.
+
+Version 1.0-7, April 7, 2010
+    * added flavour argument in dc.parfit.
+    * methods for mcmc objects added (coef, vcov, quantile).
+    * plot.dcdiag got log.lambda.max option.
+    * log.var type of plot.dctable changed.
+
+Version 1.0-6, March 14, 2010
+    * openbugs.seed removed.
+    * bugs.fit fixed, several arguments removed.
+    * dcpar package merged with dclone.
+    * WinBUGS/OpenBUGS related revision done:
+      as.mcmc.list.bugs and dc.fit now works properly.
+    * dclone.ts removed, use dcdim instead.
+
+Version 1.0-5, January 25, 2010
+    * drop and perm arguments in dcdim.
+
+Version 1.0-4, January 14, 2010
+    * nclones.list: returns 'method' attributes.
+    * vcov: got invfisher argument.
+    * S3 methods added for diagnostic functions.
+    * dclone options restructured.
+    * dclone and dcpar split: parallet computing features
+      in separate package.
+    * dcdiag: diagnostic tools for data cloning.
+    * chisq.diag: diagnostic tool added.
+
+Version 1.0-3, December 14, 2009
+    * lambdamax.diag: added back.
+    * errlines: got col argument.
+    * jags.fit: if n.iter=0, the (updated) JAGS model is returned
+      instead of an MCMC object.
+    * update.mcmc.list: function to perform automatic updates of an
+      MCMC object, until a desired statistics value 
+      (e.g. R_hat < 1.1) reached.
+
+Version 1.0-2, December 4, 2009
+    * updated.model attr in jags.fit output for further updating.
+    * bg arg in errlines and box.bg in plot.dctable for background
+      color of boxes.
+
+Version 1.0-1, November 19, 2009
+    * custommodel function added, fitting functions modified.
+
+Version 1.0-0, November 16, 2009
+    * Unload problem fixed (reported by Brian D Ripley).
+    * dctable now can take more than one models as arguments.
+    * Code annotated, documentation revised.
+
+Version 0.9-0, October 19, 2009
+    * First CRAN release with basic functionality.
+    * Support for WinBUGS added.
+    * Initial functionality is stable.

@@ -1,44 +1,65 @@
 ## main dclone functions
 export("dclone", "dcdim", 
-       "jags.fit",
-       "bugs.fit",
-       "dc.fit",
-       "clean.jags.model", "write.jags.model",
+       "jags.fit", "bugs.fit", "dc.fit",
+       "clean.jags.model", "write.jags.model", "custommodel",
+#       "openbugs.seed",
+       "updated.model",
        "dcsd",
        "nclones",
        "mcmcapply",
-       "as.mcmc.list.dc",
        "make.symmetric",
-       "dctable", "extractdctable")
+       "dctable", "extractdctable",
+       "dcdiag", "extractdcdiag", 
+       "lambdamax.diag", "chisq.diag")
+
+## parallel functions
+export("jags.parfit", "dc.parfit",
+       "snowWrapper", 
+       "clusterSize", "plotClusterSize",
+       "clusterSplitSB", 
+       "clusterSeed",
+       "parLapplySB", "parLapplySLB")
 
 ## graphical helper functions
 export("errlines")
 
 ## import from other packages
-importFrom("stats", "quantile")
+importFrom("stats", "quantile", "update")
 importFrom("coda", "as.mcmc.list")
 
 ## methods for main dclone functions/classes
 S3method("nclones", "default")
 S3method("nclones", "list")
-S3method("as.mcmc.list.dc", "mcmc.list")
 S3method("dclone", "dcdim")
 S3method("dclone", "default")
 S3method("dclone", "list")
-S3method("dclone", "ts")
 S3method("dctable", "default")
 S3method("extractdctable", "default")
+S3method("dcdiag", "default")
+S3method("extractdcdiag", "default")
+S3method("updated.model", "mcmc.list")
+S3method("update", "mcmc.list")
 
+S3method("coef", "mcmc")
+S3method("vcov", "mcmc")
+S3method("quantile", "mcmc")
 S3method("as.mcmc.list", "bugs")
 S3method("print", "mcmc.list")
 S3method("quantile", "mcmc.list")
 S3method("coef", "mcmc.list")
+S3method("dcsd", "mcmc.list")
+S3method("vcov", "mcmc.list")
+S3method("vcov", "mcmc.list")
 S3method("vcov", "mcmc.list.dc")
-S3method("as.mcmc.list.dc", "mcmc.list")
 S3method("confint", "mcmc.list.dc")
 S3method("summary", "mcmc.list.dc")
 S3method("print", "summary.mcmc.dc")
 S3method("plot", "dctable")
+S3method("plot", "dcdiag")
+S3method("print", "lambdamax.diag")
+S3method("print", "chisq.diag")
+S3method("plot", "chisq.diag")
+S3method("print", "custommodel")
 
 ## methods for helper functions/classes
 S3method("errlines", "default")

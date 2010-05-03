@@ -2,31 +2,28 @@
 \name{coef.mcmc.list}
 \Rdversion{1.1}
 \alias{dcsd}
-\alias{as.mcmc.list.dc}
+\alias{dcsd.mcmc.list}
 \alias{coef.mcmc.list}
 \alias{confint.mcmc.list.dc}
 \alias{vcov.mcmc.list.dc}
 \alias{quantile.mcmc.list}
 \title{
-Functions and methods for the 'mcmc.list' class
+Methods for the 'mcmc.list' class
 }
 \description{
-Functions and methods for 'mcmc.list' objects.
+Methods for 'mcmc.list' objects.
 }
 \usage{
-dcsd(x, na.rm = FALSE)
-as.mcmc.list.dc(x, ...)
+dcsd(object, ...)
+\method{dcsd}{mcmc.list}(object, ...)
 \method{coef}{mcmc.list}(object, ...)
 \method{confint}{mcmc.list.dc}(object, parm, level = 0.95, ...)
-\method{vcov}{mcmc.list.dc}(object, ...)
+\method{vcov}{mcmc.list.dc}(object, invfisher = TRUE, ...)
 \method{quantile}{mcmc.list}(x, ...)
 }
 \arguments{
   \item{x, object}{
   MCMC object to be processed.
-}
-  \item{na.rm}{
-Logical, if \code{NA}s should be removed.
 }
   \item{parm}{
 A specification of which parameters are to be given confidence intervals, 
@@ -38,19 +35,21 @@ The confidence level required.
   \item{\dots}{
 Further arguments passed to functions.
 }
+  \item{invfisher}{
+Logical, if the inverse of the Fisher information matrix (\code{TRUE}) should be returned
+instead of the variance-covariance matris of the joint posterior distribution (\code{FALSE}).
+}
 }
 \value{
 \code{dcsd} returns the data cloning standard errors of a posterior MCMC chain
 calculated as standard deviation times the square root of the number of clones.
 
-The function \code{as.mcmc.list.dc} creates a data cloning version of
-an 'mcmc.list' object
-
 The \code{coef} method returns mean of the posterior MCMC chains
 for the monitored parameters.
 
 The \code{confint} method returns confidence intervals for the parameters
-assuming asymptotic normality.
+assuming asymptotic normality (default, \code{"wald"}), or based on the posterior density
+(\code{"quantile"}).
 
 The \code{vcov} method returns the inverse of the Fisher information matrix.
 
@@ -58,9 +57,7 @@ The \code{quantile} method returns quantiles for each variable.
 }
 \note{
 Some functions only available for the 'mcmc.list.dc' class which inherits from
-class 'mcmc.list'. Such statistics for Bayesian models are available
-after coercion by the function \code{as.mcmc.list.dc}, but the frequentis meaning
-of the statistics will not be applicable.
+class 'mcmc.list'.
 }
 \author{
 \enc{P\'eter S\'olymos}{Peter Solymos}, \email{solymos@ualberta.ca}
@@ -100,6 +97,7 @@ coef(dcmod)
 dcsd(dcmod)
 confint(dcmod)
 vcov(dcmod)
+vcov(dcmod, invfisher = FALSE)
 quantile(dcmod)
 }
 }
