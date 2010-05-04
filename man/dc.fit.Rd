@@ -5,24 +5,24 @@
 Iterative model fitting with data cloning
 }
 \description{
-\code{\link{jags.fit}} is iteratively used to fit a model with
+\code{\link{jags.fit}} of \code{\link{bugs.fit}} is iteratively used to fit a model with
 increasing the number of clones.
 }
 \usage{
 dc.fit(data, params, model, inits, n.clones, 
 multiply = NULL, unchanged = NULL, 
 update = NULL, updatefun = NULL, initsfun = NULL,
-trace = 1, flavour = c("jags", "bugs"), ...)
+flavour = c("jags", "bugs"), ...)
 }
 \arguments{
   \item{data}{
-A list containing the data.
+A named list (not environment) containing the data.
 }
   \item{params}{
-Character vector of parameters to be samples.
+Character vector of parameters to be sampled.
 }
   \item{model}{
-Character string (name of the model file) or a function containing the model (see Examples).
+Character string (name of the model file), a function containing the model, or a or \code{\link{custommodel}} object (see Examples).
 }
   \item{inits}{
 Optional specification of initial values in the form of a list or a function (see Initialization at \code{\link[rjags]{jags.model}}). 
@@ -55,10 +55,6 @@ returned by this function from the second iteration. If initial values
 are not dependent on the previous iteration, this should be \code{NULL}, otherwise,
 it should take an 'mcmc.list' object as argument. See Examples.
 }
-  \item{trace}{
-  If positive, information is printed during the running of the iterations.
-  Higher number indicate more information.
-}
   \item{flavour}{
   If \code{"jags"}, the function \code{\link{jags.fit}} is called. If \code{"bugs"}, the function \code{\link{bugs.fit}} is called.
 }
@@ -70,7 +66,6 @@ it should take an 'mcmc.list' object as argument. See Examples.
 The function fits a JAGS/BUGS model with increasing numbers of clones, as supplied by
 the argument \code{k}. Data cloning is done by the function \code{dclone} using
 the arguments \code{multiply} and \code{unchanged}.
-
 An updating function can be provided, see Examples.
 }
 \value{
@@ -87,9 +82,13 @@ ecological models using Bayesian Markov chain Monte Carlo  methods.
 implementation is based on many discussions with Khurram Nadeem and Subhash Lele.
 }
 \seealso{
-Data cloning: \code{\link{dclone}}. \
+Data cloning: \code{\link{dclone}}.
+
+Parallel computations: \code{\link{dc.parfit}}
+
 Model fitting: \code{\link{jags.fit}}, \code{\link{bugs.fit}}
-Convergence diagnostics: \code{\link{dctable}}
+
+Convergence diagnostics: \code{\link{dctable}}, \code{\link{dcdiag}}
 }
 \examples{
 \dontrun{
@@ -156,7 +155,7 @@ summary(dcmod)
 ## data and model taken from Ponciano et al. 2009
 ## Ecology 90, 356-362.
 paurelia <- c(17,29,39,63,185,258,267,392,510,570,650,560,575,650,550,480,520,500)
-dat <- list(ncl=1, n=length(paurelia), Y=as.ts(paurelia))
+dat <- list(ncl=1, n=length(paurelia), Y=dcdim(data.matrix(paurelia)))
 beverton.holt <- function() {
     for (k in 1:ncl) {
         for(i in 2:(n+1)){
@@ -183,6 +182,29 @@ mod <- dc.fit(dat, c("lambda","beta","sigma"), beverton.holt,
 ##   lambda = 2.274
 ##   sigma  = 0.1274
 summary(mod)
+
+## Using WinBUGS/OpenBUGS
+data(schools)
+dat <- list(J = nrow(schools), y = schools$estimate, sigma.y = schools$sd)
+bugs.model <- function(){
+       for (j in 1:J){
+         y[j] ~ dnorm (theta[j], tau.y[j])
+         theta[j] ~ dnorm (mu.theta, tau.theta)
+         tau.y[j] <- pow(sigma.y[j], -2)
+       }
+       mu.theta ~ dnorm (0.0, 1.0E-6)
+       tau.theta <- pow(sigma.theta, -2)
+       sigma.theta ~ dunif (0, 1000)
+     }  
+inits <- function(){
+    list(theta=rnorm(nrow(schools), 0, 100), mu.theta=rnorm(1, 0, 100),
+         sigma.theta=runif(1, 0, 100))
+}
+param <- c("mu.theta", "sigma.theta")
+sim2 <- dc.fit(dat, param, bugs.model, n.clones=1:2, 
+    flavour="bugs", program="WinBUGS", multiply="J")
+sim3 <- dc.fit(dat, param, bugs.model, n.clones=1:2, 
+    flavour="bugs", program="OpenBUGS", multiply="J")
 }
 }
 \keyword{ models }

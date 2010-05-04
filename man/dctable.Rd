@@ -5,6 +5,11 @@
 \alias{extractdctable}
 \alias{extractdctable.default}
 \alias{plot.dctable}
+\alias{dcdiag}
+\alias{dcdiag.default}
+\alias{extractdcdiag}
+\alias{extractdcdiag.default}
+\alias{plot.dcdiag}
 \title{
 Retrieve descriptive statistics from fitted objects to evaluate convergence
 }
@@ -17,10 +22,17 @@ separately for each parameters of interest.
 dctable(x, ...)
 \method{dctable}{default}(x, ...)
 \method{plot}{dctable}(x, which = 1:length(x), 
-type = c("all", "var", "logvar"),
-position = "topright", box.cex = 0.75, ...)
+type = c("all", "var", "log.var"),
+position = "topright", box.cex = 0.75, box.bg, ...)
 extractdctable(x, ...)
 \method{extractdctable}{default}(x, ...)
+
+dcdiag(x, ...)
+\method{dcdiag}{default}(x, ...)
+\method{plot}{dcdiag}(x, which = c("all", "lambda.max", 
+"ms.error", "r.squared", "log.lambda.max"), position = "topright", ...)
+extractdcdiag(x, ...)
+\method{extractdcdiag}{default}(x, ...)
 }
 \arguments{
   \item{x}{
@@ -30,8 +42,8 @@ extractdctable(x, ...)
   Optionally more fitted model objects for function \code{dctable}.
 }
   \item{which}{
-  What to plot, character names or integer indices of the estimated parameters
-  are accepted.
+  What to plot. For \code{dctable}, character names or integer indices of the estimated parameters are accepted.
+  for \code{dcdiag} it should be one of \code{c("all", "lambda.max", "ms.error", "r.squared")}.
 }
   \item{type}{
   Type of plot to be drawn. See Details.
@@ -42,6 +54,9 @@ extractdctable(x, ...)
   \item{box.cex}{
   Scaling factor for the interquartile boxes.
 }
+  \item{box.bg}{
+  Bacground color for the interquartile boxes.
+}
 }
 \details{
 \code{dctable} returns the \code{"dctable"} attribute of the MCMC object,
@@ -49,26 +64,50 @@ or if it is \code{NULL}, calculates the \code{dctable} summaries.
 If more than one fitted objects are provided, summaries are calculated
 for all objects, and results are ordered by the number of clones.
 
-The \code{plot} method helps in graphical representation of the descriptive statistics.
+The \code{plot} method for \code{dctable} helps in graphical representation of the descriptive statistics.
 \code{type = "all"} results in plotting means, standard deviations and quantiles
 against the number of clones as boxplot. \code{type = "var"} reults in plotting the scaled variances
 against the number of clones. In this case variances are divided by the variance of the
-model with smallest number of clones, \code{min(n.clones)}. \code{type = "logvar"} is the same
+model with smallest number of clones, \code{min(n.clones)}. \code{type = "log.var"} is the same
 as \code{"var"}, but on the log scale.
 Along with the values, the \code{min(n.clones) / n.clones} line is plotted for reference.
+
+Lele et al. (2010) itroduced diagnostic measures
+for checking the convergence of the data cloning algorithm
+which are based on the joint posterior distribution
+and not only on single parameters. These
+include to calculate the largest eigenvalue of the posterior
+variance covariance matrix (\code{lambda.max} as returned by \code{\link{lambdamax.diag}}),
+or to calculate mean squared error (\code{ms. error}) and another
+correlation-like fit statistic (\code{r.squared}) based on a Chi-square2 approximation
+(as returned by \code{\link{chisq.diag}}). The maximum
+eigenvalue reflects the degenerateness of the
+posterior distribution, while the two fit measures reflect
+if the Normal approximation is adequate. All
+three statistics should converge to zero as the number of clones increases.
+If this happens, different prior specifications are no
+longer influencing the results (Lele et al., 2007, 2010).
 }
 \value{
 An object of class 'dctable'.
 It is a list, and contains as many data frames as the number of parameters in the fitted object.
 Each data frame contains descriptives as the function of the number of clones.
 
-The \code{plot} method produces graphs as side effect.
+\code{dcdiag} returns a data frame with convergence diagnostics.
+
+The \code{plot} methods produce graphs as side effect.
 }
 \references{
 Lele, S.R., B. Dennis and F. Lutscher, 2007.
 Data cloning: easy maximum likelihood estimation for complex 
 ecological models using Bayesian Markov chain Monte Carlo  methods.
 \emph{Ecology Letters} \strong{10}, 551--563.
+
+Lele, S. R., Nadeem, K. and Schmuland, B, 2010.
+Estimability and likelihood inference for generalized linear
+mixed models using data cloning. 
+\emph{Journal of the American Statistical Association}
+Under revision.
 }
 \author{
 \enc{P\'eter S\'olymos}{Peter Solymos}, \email{solymos@ualberta.ca},

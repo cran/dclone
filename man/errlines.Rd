@@ -11,7 +11,7 @@ The function plots error bars to existing plot.
 \usage{
 errlines(x, ...)
 \method{errlines}{default}(x, y, type = "l", code = 0, 
-width = 0, vertical = TRUE, ...)
+width = 0, vertical = TRUE, col = 1, bg = NA, ...)
 }
 \arguments{
   \item{x}{
@@ -35,6 +35,12 @@ width of the boxes (if \code{type = "b"}).
   \item{vertical}{
 Logical, if errorbars should be plotted vertically or horizontally.
 }
+  \item{col}{
+Color of the error lines to be drawn, recicled.
+}
+  \item{bg}{
+If \code{type = "b"} the bacground color of the boxes. By default, no background color used.
+}
   \item{\dots}{
 Other arguments passed to the function \code{\link{lines}}.
 }
@@ -49,7 +55,7 @@ lower ticks are drawn, if \code{code = 3} both
 lower and upper ticks are drawn.
 }
 \value{
-Add error bars to an existing plot as a side effect.
+Adds error bars to an existing plot as a side effect.
 Returns \code{NULL} invisibly.
 }
 \author{
@@ -69,15 +75,16 @@ plot(x, a, ylim = range(y))
 errlines(x, y)
 plot(x, a, ylim = range(y))
 errlines(x, y, width = 0.5, code = 1)
-plot(x, a, ylim = range(y))
-errlines(x, y, width = 0.5, code = 3)
+plot(x, a, ylim = range(y), col = 1:10)
+errlines(x, y, width = 0.5, code = 3, col = 1:10)
 plot(x, a, ylim = range(y))
 errlines(x, y, width = 0.5, code = 2, type = "b")
 plot(x, a, ylim = range(y))
 errlines(x, y, width = 0.5, code = 3, type = "b")
-plot(x, a, ylim = range(y))
-errlines(x, y, width = 0.5, code = 3, type = "b")
+plot(x, a, ylim = range(y), type = "n")
+errlines(x, y, width = 0.5, code = 3, type = "b", bg = 1:10)
 errlines(x, cbind(a-b/2, a+b/2+rev(b)/2))
+points(x, a)
 par(opar)
 }
 \keyword{ aplot }

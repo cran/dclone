@@ -4,19 +4,26 @@ function(x, ...)
     ## retrieve coda samples
     sarr <- x$sims.array
     ## exclude deviance monitor
-    sarr <- sarr[,,dimnames(sarr)[[3]] != "deviance"]
+#    if (!DIC)
+#        sarr <- sarr[,,dimnames(sarr)[[3]] != "deviance", drop=FALSE]
     ## rearranging the array into coda mcmc.list format
-    res <- lapply(1:x$n.chains, function(i) sarr[,i,])
+    res <- lapply(1:x$n.chains, function(i) sarr[,i,, drop=FALSE])
+    DIM <- dim(res[[1]])[-2]
+    DIMNAMES <- dimnames(res[[1]])[-2]
+    for (i in 1:x$n.chains) {
+        dim(res[[i]]) <- DIM
+        dimnames(res[[i]]) <- DIMNAMES
+    }
     ## retrieve ts attributes
-    niter <- nrow(res[[1]])
+    niter <- NROW(res[[1]])
     start <- x$n.burnin+1
     end <- x$n.iter
     thin <- x$n.thin
     nobs <- floor((end - start)/thin + 1)
-    ## NOTE: thin != 1 values can cause problems
-    ## error message produced if this is the case
-    if (niter < nobs) 
-        stop("can't coerce 'bugs' object as 'mcmc.list',\nconsider refitting the model with 'n.thin = 1'")
+    ## some tweaking for OpenBUGS
+    if (niter < nobs) {
+        start <- start + thin - 1
+    }
     ## makes mcmc objects
     res <- lapply(res, function(z) mcmc(data = z,
         start = start, end = end, thin = thin))
