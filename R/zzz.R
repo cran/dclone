@@ -13,6 +13,9 @@
         options("dclone.verbose"=1)
     if (is.null(getOption("dclone.LB")))
         options("dclone.LB"=FALSE)
+    if (as.numeric(substr(utils::packageDescription("rjags", 
+        field="Version"), 1, 1)) > 1)
+            load.module("glm")
     invisible(NULL)
 }
 
