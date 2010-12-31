@@ -18,7 +18,8 @@ chisq.diag(x)
 }
 }
 \details{
-This diagnostics can be used to test for the data cloning convergence.
+This diagnostics can be used to test for the data cloning convergence
+(Lele et al. 2007, 2010).
 Asymptotically the posterior distribution of the parameters approaches
 a degenerate multivariate normal distribution. As the distribution
 is getting more degenerate, the maximal eigenvalue (\eqn{\lambda_{max}})
@@ -28,7 +29,7 @@ If only one parameter is dealt with, the unscaled posterior standard
 error is given.
 
 There is no critical value under which \eqn{\lambda_{max}} is good enough.
-By default, 0.1 is used (see \code{getOption("dclone.crit")}).
+By default, 0.05 is used (see \code{getOption("dclone")$diag}).
 }
 \value{
 Returns a single vaue, the maximum of the eigenvalues of the 
@@ -39,6 +40,12 @@ Lele, S.R., B. Dennis and F. Lutscher, 2007.
 Data cloning: easy maximum likelihood estimation for complex 
 ecological models using Bayesian Markov chain Monte Carlo  methods.
 \emph{Ecology Letters} \strong{10}, 551--563.
+
+Lele, S.R., K. Nadeem and B. Schmuland, 2010.
+Estimability and likelihood inference for generalized linear
+mixed models using data cloning. 
+\emph{Journal of the American Statistical Association}
+In press.
 }
 \author{
 Khurram Nadeem, \email{knadeem@math.ualberta.ca}

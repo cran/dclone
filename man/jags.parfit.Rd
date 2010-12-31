@@ -29,6 +29,8 @@ Character string (name of the model file), a function containing the model, or a
   \item{inits}{
 Specification of initial values in the form of a list or a function, can be missing if \code{n.chains <= 4}. 
 \code{inits} must contain RNG seed information, too (see Initialization at \code{\link[rjags]{jags.model}}).
+If this is a function, it must be self containing, i.e. not having references to R objects outside of the
+function, or the objects should be exported with \code{\link{clusterExport}} before calling \code{jags.parfit}.
 }
   \item{n.chains}{
 Number of chains to generate, must be higher than 1. Ideally, this is equal to the number of parallel workers in the cluster.
@@ -74,6 +76,25 @@ pm <- jags.parfit(cl, dat, "beta", glm.model)
 ## chains are not identical -- this is good
 pm[1:2,]
 summary(pm)
+## examples on how to use initial values
+## fixed initial values
+inits <- list(list(beta=matrix(c(0,1),1,2)), 
+    list(beta=matrix(c(1,0),1,2)), 
+    list(beta=matrix(c(0,0),1,2)))
+pm2 <- jags.parfit(cl, dat, "beta", glm.model, inits)
+## random numbers generated prior to jags.parfit
+inits <- list(list(beta=matrix(rnorm(2),1,2)), 
+    list(beta=matrix(rnorm(2),1,2)), 
+    list(beta=matrix(rnorm(2),1,2)))
+pm3 <- jags.parfit(cl, dat, "beta", glm.model, inits)
+## self contained function
+inits <- function() list(beta=matrix(rnorm(2),1,2))
+pm4 <- jags.parfit(cl, dat, "beta", glm.model, inits)
+## function pointing to the global environment
+fun <- function() list(beta=matrix(rnorm(2),1,2))
+inits <- function() fun()
+clusterExport(cl, "fun")
+pm4 <- jags.parfit(cl, dat, "beta", glm.model, inits)
 stopCluster(cl)
 }
 }

@@ -3,7 +3,7 @@ function(cl, data, params, model, inits = NULL, n.chains = 3, ...)
 {
     if (!inherits(cl, "cluster"))
         stop("'cl' must be a 'cluster' object")
-    trace <- getOption("dclone.verbose")
+    trace <- getOption("dcoptions")$verbose
     ## eval args
     if (!is.null(list(...)$n.iter))
         if (list(...)$n.iter == 0)
@@ -25,19 +25,18 @@ function(cl, data, params, model, inits = NULL, n.chains = 3, ...)
     ## parallel function to evaluate by snowWrapper
     jagsparallel <- function(i, ...)   {
         jags.fit(data=cldata$data, params=cldata$params, 
-        model=cldata$model, 
-        ## model=cldata$model[[i]], 
-        inits=cldata$inits[[i]], n.chains=1, updated.model=FALSE, ...)
+            model=cldata$model, 
+            inits=cldata$inits[[i]], n.chains=1, updated.model=FALSE, ...)
     }
     if (trace) {
         cat("\nParallel computation in progress\n\n")
         flush.console()
     }
     ## parallel computations
-    balancing <- if (getOption("dclone.LB"))
+    balancing <- if (getOption("dcoptions")$LB)
         "load" else "none"
     mcmc <- snowWrapper(cl, 1:n.chains, jagsparallel, cldata, lib="dclone", 
-        balancing=balancing, size=1, dir=getwd(), ...)
+        balancing=balancing, size=1, dir=getwd(), set.rng=TRUE, ...)
     ## binding the chains
     res <- as.mcmc.list(lapply(mcmc, as.mcmc))
     ## attaching attribs and return

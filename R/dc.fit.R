@@ -15,13 +15,13 @@ update=NULL, updatefun=NULL, initsfun=NULL, flavour = c("jags", "bugs"), ...)
     k <- n.clones[order(n.clones)]
     k <- unique(k)
     times <- length(k)
-    rhat.crit <- getOption("dclone.rhat")
-    trace <- getOption("dclone.verbose")
+    rhat.crit <- getOption("dcoptions")$rhat
+    trace <- getOption("dcoptions")$verbose
     ## evaluate updating
     if (!is.null(update) != !is.null(updatefun))
         stop("both 'update' and 'updatefun' must be provided")
     if (!is.null(update)) {
-        unchanged <- c(unchanged, update)
+        unchanged <- unique(c(unchanged, update))
         updatefun <- match.fun(updatefun)
     }
     ## evaluate inits
