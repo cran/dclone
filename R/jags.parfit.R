@@ -1,6 +1,9 @@
 jags.parfit <-
 function(cl, data, params, model, inits = NULL, n.chains = 3, ...)
 {
+    ## stop if rjags not found
+    if (!suppressWarnings(require(rjags)))
+        stop("there is no package called 'rjags'")
     if (!inherits(cl, "cluster"))
         stop("'cl' must be a 'cluster' object")
     trace <- getOption("dcoptions")$verbose
@@ -36,7 +39,7 @@ function(cl, data, params, model, inits = NULL, n.chains = 3, ...)
     balancing <- if (getOption("dcoptions")$LB)
         "load" else "none"
     mcmc <- snowWrapper(cl, 1:n.chains, jagsparallel, cldata, lib="dclone", 
-        balancing=balancing, size=1, dir=getwd(), set.rng=TRUE, ...)
+        balancing=balancing, size=1, dir=getwd(), rng.type=getOption("dcoptions")$RNG, ...)
     ## binding the chains
     res <- as.mcmc.list(lapply(mcmc, as.mcmc))
     ## attaching attribs and return
