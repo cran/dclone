@@ -2,6 +2,9 @@ update.mcmc.list <-
 function(object, fun, times = 1, n.update = 0, 
 n.iter, thin, ...)
 {
+    ## stop if rjags not found
+    if (!suppressWarnings(require(rjags)))
+        stop("there is no package called 'rjags'")
     ## eval of args
     if (is.null(updated.model(object)))
         stop("updated model not found")
@@ -13,6 +16,8 @@ n.iter, thin, ...)
     fval <- fun(mod)
     if (!is.logical(fval))
         stop("'fun' must return logical")
+    if (length(fval) > 1)
+        stop("'fun' must return a single value")
     if (fval)
         return(object)
     ## what to sample

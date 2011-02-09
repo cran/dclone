@@ -2,6 +2,9 @@ dc.parfit <-
 function(cl, data, params, model, inits, n.clones, multiply=NULL, unchanged=NULL,
 flavour = c("jags", "bugs"), ...)
 {
+    ## stop if rjags not found
+    if (flavour=="jags" && !suppressWarnings(require(rjags)))
+        stop("there is no package called 'rjags'")
     ## initail evals
     if (!inherits(cl, "cluster"))
         stop("'cl' must be a 'cluster' object")
@@ -54,13 +57,13 @@ flavour = c("jags", "bugs"), ...)
     cldata <- list(data=data, params=params, model=model, inits=inits,
         multiply=multiply, unchanged=unchanged, k=k)
     ## parallel computations
-    rng <- c("Wichmann-Hill", "Marsaglia-Multicarry",
-        "Super-Duper", "Mersenne-Twister")
-    rng <- rep(rng, length(cl))[1:length(cl)]
-    balancing <- if (getOption("dcoptions")$LB)
+#    rng <- c("Wichmann-Hill", "Marsaglia-Multicarry",
+#        "Super-Duper", "Mersenne-Twister")
+#    rng <- rep(rng, length(cl))[1:length(cl)]
+    balancing <- if (!getOption("dcoptions")$LB)
         "size" else "both"
     pmod <- snowWrapper(cl, k, dcparallel, cldata, lib="dclone", 
-        balancing=balancing, size=k, dir=getwd(), set.rng=TRUE, ...)
+        balancing=balancing, size=k, dir=getwd(), rng.type=getOption("dcoptions")$RNG, ...)
     mod <- pmod[[times]]
 
     ## dctable
