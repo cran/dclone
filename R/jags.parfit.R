@@ -13,13 +13,15 @@ function(cl, data, params, model, inits = NULL, n.chains = 3, ...)
             stop("'n.iter = 0' is not supported for parallel computations")
     if (n.chains == 1)
         stop("no need for parallel computing with 1 chain")
-    ## writing data file
+
+    ## write model
     if (is.function(model) || inherits(model, "custommodel")) {
         if (is.function(model))
             model <- match.fun(model)
         model <- write.jags.model(model)
         on.exit(try(clean.jags.model(model)))
     }
+
     ## generating initial values and RNGs if needed
     inits <- jags.fit(data, params, model, inits, n.chains,
         n.adapt=0, n.update=0, n.iter=0)$state(internal=TRUE)

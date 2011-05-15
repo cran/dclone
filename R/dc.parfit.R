@@ -27,13 +27,6 @@ flavour = c("jags", "bugs"), ...)
     ## evaluate inits
     if (missing(inits))
         inits <- NULL
-    ## write model
-    if (is.function(model) || inherits(model, "custommodel")) {
-        if (is.function(model))
-            model <- match.fun(model)
-        model <- write.jags.model(model)
-        on.exit(try(clean.jags.model(model)))
-    }
 
     #### parallel part
     if (trace) {
@@ -53,6 +46,14 @@ flavour = c("jags", "bugs"), ...)
             return(mod) else return(list(dct=dclone:::extractdctable(mod), dcd=dclone:::extractdcdiag(mod)))
     }
 
+    ## write model
+    if (is.function(model) || inherits(model, "custommodel")) {
+        if (is.function(model))
+            model <- match.fun(model)
+        model <- write.jags.model(model)
+        on.exit(try(clean.jags.model(model)))
+    }
+
     ## common data
     cldata <- list(data=data, params=params, model=model, inits=inits,
         multiply=multiply, unchanged=unchanged, k=k)
@@ -63,7 +64,7 @@ flavour = c("jags", "bugs"), ...)
     balancing <- if (!getOption("dcoptions")$LB)
         "size" else "both"
     pmod <- snowWrapper(cl, k, dcparallel, cldata, lib="dclone", 
-        balancing=balancing, size=k, dir=getwd(), rng.type=getOption("dcoptions")$RNG, ...)
+        balancing=balancing, size=k, rng.type=getOption("dcoptions")$RNG, ...)
     mod <- pmod[[times]]
 
     ## dctable
