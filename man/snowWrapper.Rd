@@ -1,3 +1,4 @@
+\encoding{UTF-8}
 \name{snowWrapper}
 \Rdversion{1.1}
 \alias{snowWrapper}
@@ -53,6 +54,7 @@ Character, \code{"none"} or the type of RNG on the workers (see \code{\link[snow
 }
   \item{cleanup}{
 logical, if \code{cldata} should be removed from the workers after applying \code{fun}.
+If \code{TRUE}, effects of \code{lib} and \code{dir} arguments are also cleaned up.
 }
   \item{\dots}{
 Other arguments of \code{fun}, that are simple values and not objects. (Arguments passed as objects should be specified in \code{cldata}, otherwise not exported to the cluster.)
@@ -85,7 +87,7 @@ is identical to size balancing. This splitting is non-deterministic (might not b
 Usually a list with results returned by the cluster.
 }
 \author{
-\enc{P\'eter S\'olymos}{Peter Solymos}, \email{solymos@ualberta.ca}
+\enc{Pe'ter So'lymos}{Peter Solymos}, \email{solymos@ualberta.ca}
 }
 \seealso{
 Size balancing: \code{\link{parLapplySB}}, \code{\link{parLapplySLB}}

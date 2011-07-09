@@ -1,3 +1,4 @@
+\encoding{UTF-8}
 \name{dc.fit}
 \Rdversion{1.1}
 \alias{dc.fit}
@@ -46,14 +47,18 @@ is for making priors more informative, and anhancing convergence.
 See Details and Examples.
 }
   \item{updatefun}{
-A function to use for updating \code{data[[update]]}. It should take an 'mcmc.list' object as argument.
+A function to use for updating \code{data[[update]]}. It should take an 'mcmc.list' object as 1st argument,
+2nd argument can be the number of clones.
 See Details and Examples.
 }
   \item{initsfun}{
 A function to use for generating initial values, \code{inits} are updated by the object
 returned by this function from the second iteration. If initial values
 are not dependent on the previous iteration, this should be \code{NULL}, otherwise,
-it should take an 'mcmc.list' object as argument. See Examples.
+it should take an 'mcmc.list' object as 1st argument, 2nd argument can be the
+number of clones. This feature is useful if latent nodes are provided in \code{inits}
+so it also requires to be cloned for subsequent iterations.
+See Details and Examples.
 }
   \item{flavour}{
   If \code{"jags"}, the function \code{\link{jags.fit}} is called. If \code{"bugs"}, the function \code{\link{bugs.fit}} is called.
@@ -76,9 +81,18 @@ Lele, S.R., B. Dennis and F. Lutscher, 2007.
 Data cloning: easy maximum likelihood estimation for complex 
 ecological models using Bayesian Markov chain Monte Carlo  methods.
 \emph{Ecology Letters} \strong{10}, 551--563.
+
+Lele, S. R., K. Nadeem and B. Schmuland, 2010.
+Estimability and likelihood inference for generalized linear mixed models using data cloning.
+\emph{Journal of the American Statistical Association}
+\strong{105}, 1617--1625.
+
+\enc{So'lymos}{Solymos}, P., 2010. dclone: Data Cloning in R.
+\emph{The R Journal} \strong{2(2)}, 29--37.
+URL: \url{http://journal.r-project.org/archive/2010-2/RJournal_2010-2_Solymos.pdf}
 }
 \author{
-\enc{P\'eter S\'olymos}{Peter Solymos}, \email{solymos@ualberta.ca}, 
+\enc{Pe'ter So'lymos}{Peter Solymos}, \email{solymos@ualberta.ca}, 
 implementation is based on many discussions with Khurram Nadeem and Subhash Lele.
 }
 \seealso{
@@ -106,20 +120,27 @@ Y <- rpois(n, exp(linpred))
 jfun1 <- function() {
     for (i in 1:n) {
         Y[i] ~ dpois(lambda[i])
-        log(lambda[i]) <- alpha[i] + inprod(X[i,], beta[1,])
+        log(lambda[i]) <- alpha[i] + inprod(X[i,], beta)
         alpha[i] ~ dnorm(0, 1/sigma^2)
     }
     for (j in 1:np) {
-        beta[1,j] ~ dnorm(0, 0.001)
+        beta[j] ~ dnorm(0, 0.001)
     }
     sigma ~ dlnorm(0, 0.001)
 }
 ## data
 jdata <- list(n = n, Y = Y, X = X, np = NCOL(X))
-## number of clones to be used, etc.
+## inits with latent variable and parameters
+ini <- list(alpha=rep(0,n), beta=rep(0, NCOL(X)))
+## function to update inits
+ifun <- function(model, n.clones) {
+    list(alpha=dclone(rep(0,n), n.clones),
+        beta=coef(model)[-length(coef(model))])
+}
 ## iteartive fitting
-jmod <- dc.fit(jdata, c("beta", "sigma"), jfun1, 
-    n.clones = 1:5, multiply = "n", unchanged = "np")
+jmod <- dc.fit(jdata, c("beta", "sigma"), jfun1, ini,
+    n.clones = 1:5, multiply = "n", unchanged = "np",
+    initsfun=ifun)
 ## summary with DC SE and R hat
 summary(jmod)
 dct <- dctable(jmod)

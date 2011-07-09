@@ -1,3 +1,4 @@
+\encoding{UTF-8}
 \name{dcoptions}
 \alias{dcoptions}
 \title{
@@ -33,9 +34,10 @@ Tags are the following:
   \item{RNG}{parallel RNG type, either 
     \code{"none"} (default), \code{"RNGstream"} or \code{"SPRNG"},
     see \code{\link[snow]{clusterSetupRNG}}.}
+  \item{overwrite}{logical, should existing model file be overwitten, default is \code{FALSE}.}
 }
 \author{
-Peter Solymos <solymos@ualberta.ca>
+\enc{Pe'ter So'lymos}{Peter Solymos}, \email{solymos@ualberta.ca}
 }
 \examples{
 getOption("dcoptions")

@@ -21,7 +21,7 @@ flavour = c("jags", "bugs"), ...)
     times <- length(k)
     if (times < 2)
         stop("no need for parallel computing")
-    ## globel options
+    ## global options
     rhat.opts <- getOption("dcoptions")$rhat
     trace <- getOption("dcoptions")$verbose
     ## evaluate inits
@@ -70,7 +70,7 @@ flavour = c("jags", "bugs"), ...)
         getwd() else NULL
     pmod <- snowWrapper(cl, k, dcparallel, cldata, lib="dclone", 
         balancing=balancing, size=k, 
-        rng.type=getOption("dcoptions")$RNG, cleanup=TRUE, dir=dir)
+        rng.type=getOption("dcoptions")$RNG, cleanup=TRUE, dir=dir, ...)
     mod <- pmod[[times]]
 
     ## dctable

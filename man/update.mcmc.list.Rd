@@ -1,3 +1,4 @@
+\encoding{UTF-8}
 \name{update.mcmc.list}
 \Rdversion{1.1}
 \alias{update.mcmc.list}
@@ -59,7 +60,7 @@ and sampled by \code{\link[rjags]{coda.samples}} if convergence diagnostics were
 \code{autoupdate} returns an MCMC object with \code{"updated.model"} attribute.
 }
 \author{
-\enc{P\'eter S\'olymos}{Peter Solymos}, \email{solymos@ualberta.ca}
+\enc{Pe'ter So'lymos}{Peter Solymos}, \email{solymos@ualberta.ca}
 }
 \seealso{
 \code{\link{jags.fit}}, \code{\link[rjags]{coda.samples}}

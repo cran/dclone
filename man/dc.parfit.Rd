@@ -1,3 +1,4 @@
+\encoding{UTF-8}
 \name{dc.parfit}
 \Rdversion{1.1}
 \alias{dc.parfit}
@@ -45,7 +46,7 @@ to be left unchanged.
   If \code{"jags"}, the function \code{\link{jags.fit}} is called. If \code{"bugs"}, the function \code{\link{bugs.fit}} is called.
 }
   \item{\dots}{
-  Other values supplied to \code{\link[dclone]{jags.fit}}, or \code{\link[dclone]{bugs.fit}}, depending on the \code{flavour} argument. (Note, \code{falvour = "bugs"} has not been tested!)
+  Other values supplied to \code{\link[dclone]{jags.fit}}, or \code{\link[dclone]{bugs.fit}}, depending on the \code{flavour} argument.
 }
 }
 \details{
@@ -53,6 +54,9 @@ The \code{dc.parfit} is a parallel computing version of \code{\link[dclone]{dc.f
 The vector \code{n.clones} is used to determine size balancing. If load balancing is also desired 
 besides of size balancing (e.g. due to unequal performance of the workers, the option \code{"dclone.LB"} should be set to \code{TRUE} (by using \code{options("dclone.LB" = TRUE)}). By default, the \code{"dclone.LB"}
 option is \code{FALSE} for reproducibility reasons.
+
+Some arguments from \code{\link{dc.fit}} are not availabe in parallel version 
+(\code{update}, \code{updatefun}, \code{initsfun}).
 }
 \value{
 An object inheriting from the class 'mcmc.list'.
@@ -62,9 +66,18 @@ Lele, S.R., B. Dennis and F. Lutscher, 2007.
 Data cloning: easy maximum likelihood estimation for complex 
 ecological models using Bayesian Markov chain Monte Carlo  methods.
 \emph{Ecology Letters} \strong{10}, 551--563.
+
+Lele, S. R., K. Nadeem and B. Schmuland, 2010.
+Estimability and likelihood inference for generalized linear mixed models using data cloning.
+\emph{Journal of the American Statistical Association}
+\strong{105}, 1617--1625.
+
+\enc{So'lymos}{Solymos}, P., 2010. dclone: Data Cloning in R.
+\emph{The R Journal} \strong{2(2)}, 29--37.
+URL: \url{http://journal.r-project.org/archive/2010-2/RJournal_2010-2_Solymos.pdf}
 }
 \author{
-\enc{P\'eter S\'olymos}{Peter Solymos}, \email{solymos@ualberta.ca}
+\enc{Pe'ter So'lymos}{Peter Solymos}, \email{solymos@ualberta.ca}
 }
 \seealso{
 Sequential version: \code{\link[dclone]{dc.fit}}.
