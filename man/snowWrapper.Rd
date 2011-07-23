@@ -10,8 +10,8 @@ designed to work closely with MCMC fitting functions (can be called from inside 
 }
 \usage{
 snowWrapper(cl, seq, fun, cldata, name = "cldata", lib = NULL, evalq=NULL,
-size = 1, balancing = c("none", "load", "size", "both"), dir = getwd(), 
-rng.type = c("none", "RNGstream", "SPRNG"), ...)
+size = 1, balancing = c("none", "load", "size", "both"), dir = NULL, 
+rng.type = c("none", "RNGstream", "SPRNG"), cleanup = TRUE, ...)
 }
 \arguments{
   \item{cl}{
@@ -46,10 +46,13 @@ Character, type of balancing to perform (see Details).
 Vector of problem sizes (or relative performance information) corresponding to elements of \code{seq} (recycled if needed). The default \code{1} indicates equality of problem sizes.
 }
   \item{dir}{
-Working directory to use.
+Working directory to use, if \code{NULL} working directory is not set on workers (default).
 }
   \item{rng.type}{
 Character, \code{"none"} or the type of RNG on the workers (see \code{\link[snow]{clusterSetupRNG}}).
+}
+  \item{cleanup}{
+logical, if \code{cldata} should be removed from the workers after applying \code{fun}.
 }
   \item{\dots}{
 Other arguments of \code{fun}, that are simple values and not objects. (Arguments passed as objects should be specified in \code{cldata}, otherwise not exported to the cluster.)
