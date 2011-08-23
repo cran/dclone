@@ -12,7 +12,7 @@ Low level functions for implementing
     complex models using data cloning (Lele et al. 2007) and Bayesian
     Markov chain Monte Carlo methods with support 
     for JAGS, WinBUGS and OpenBUGS.
-    Parallel computing with JAGS is supported.
+    With some functions for parallel MCMC computations.
 
 Main functions include:
 
@@ -40,12 +40,12 @@ Main functions include:
 
 }
 \author{
-Authors: \enc{P\'eter S\'olymos}{Peter Solymos}
+Author: \enc{Pe'ter So'lymos}{Peter Solymos}
 
-Maintainer: \enc{P\'eter S\'olymos}{Peter Solymos}, \email{solymos@ualberta.ca}
+Maintainer: \enc{Pe'ter So'lymos}{Peter Solymos}, \email{solymos@ualberta.ca}
 }
 \references{
-Solymos, P., 2010. dclone: Data Cloning in R.
+\enc{So'lymos}{Solymos}, P., 2010. dclone: Data Cloning in R.
 \emph{The R Journal} \strong{2(2)}, 29--37.
 URL: \url{http://journal.r-project.org/archive/2010-2/RJournal_2010-2_Solymos.pdf}
 

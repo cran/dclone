@@ -1,3 +1,4 @@
+\encoding{UTF-8}
 \name{errlines}
 \Rdversion{1.1}
 \alias{errlines}
@@ -59,7 +60,7 @@ Adds error bars to an existing plot as a side effect.
 Returns \code{NULL} invisibly.
 }
 \author{
-Peter Solymos
+\enc{Pe'ter So'lymos}{Peter Solymos}, \email{solymos@ualberta.ca}
 }
 \seealso{
 \code{\link{lines}}, \code{\link{arrows}}, \code{\link{segments}}

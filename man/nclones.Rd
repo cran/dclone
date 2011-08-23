@@ -27,7 +27,7 @@ Other arguments to be passed.
 Returns the number of of clones, or \code{NULL}.
 }
 \author{
-\enc{P\'eter S\'olymos}{Peter Solymos}, \email{solymos@ualberta.ca}
+\enc{Pe'ter So'lymos}{Peter Solymos}, \email{solymos@ualberta.ca}
 }
 \seealso{
 \code{\link{dclone}}

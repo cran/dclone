@@ -1,5 +1,5 @@
 \encoding{UTF-8}
-\name{coef.mcmc.list}
+\name{mcmc.list-methods}
 \Rdversion{1.1}
 \alias{dcsd}
 \alias{dcsd.mcmc.list}
@@ -47,11 +47,13 @@ calculated as standard deviation times the square root of the number of clones.
 The \code{coef} method returns mean of the posterior MCMC chains
 for the monitored parameters.
 
-The \code{confint} method returns confidence intervals for the parameters
-assuming asymptotic normality (default, \code{"wald"}), or based on the posterior density
-(\code{"quantile"}).
+The \code{confint} method returns Wald-type confidence intervals for the parameters
+assuming asymptotic normality.
 
-The \code{vcov} method returns the inverse of the Fisher information matrix.
+The \code{vcov} method returns the inverse of the Fisher information matrix
+(\code{invfisher = TRUE}) or the covariance matrix of the joint posterior distribution
+(\code{invfisher = FALSE}). The \code{invfisher} is valid only for \code{mcmc.list.dc}
+(data cloned) objects.
 
 The \code{quantile} method returns quantiles for each variable.
 }
@@ -60,7 +62,7 @@ Some functions only available for the 'mcmc.list.dc' class which inherits from
 class 'mcmc.list'.
 }
 \author{
-\enc{P\'eter S\'olymos}{Peter Solymos}, \email{solymos@ualberta.ca}
+\enc{Pe'ter So'lymos}{Peter Solymos}, \email{solymos@ualberta.ca}
 }
 \seealso{
 \code{\link{jags.fit}}, \code{\link{bugs.fit}}

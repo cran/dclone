@@ -1,3 +1,4 @@
+\encoding{UTF-8}
 \name{clusterSize}
 \Rdversion{1.1}
 \alias{clusterSize}
@@ -54,7 +55,7 @@ values in \code{size}.
 its arguments. As a side effect, a plot is produced (if \code{plot = TRUE}).
 }
 \author{
-\enc{P\'eter S\'olymos}{Peter Solymos}, \email{solymos@ualberta.ca}
+\enc{Pe'ter So'lymos}{Peter Solymos}, \email{solymos@ualberta.ca}
 }
 \examples{
 ## determine the number of workers needed
