@@ -10,11 +10,12 @@ Convenient functions designed to work well with cloned data arguments and JAGS.
 }
 \usage{
 jags.fit(data, params, model, inits = NULL, n.chains = 3, n.adapt = 1000,
-n.update = 0, thin = 1, n.iter = 5000, updated.model=TRUE, ...)
+n.update = 1000, thin = 1, n.iter = 5000, updated.model=TRUE, ...)
 }
 \arguments{
   \item{data}{
-A named list or environment containing the data. If an environment, data cloning might not work properly (has to be done manually).
+A named list or environment containing the data. If an environment, \code{data}
+is coerced into a list so cloning will work properly.
 }
   \item{params}{
 Character vector of parameters to be sampled.
@@ -33,7 +34,8 @@ Number of chains to generate.
 Number of steps for adaptation.
 }
   \item{n.update}{
-Number of updates before iterations.
+Number of updates before iterations. It is usually a bad idea to use \code{n.update=0} if \code{n.adapt>0}, so 
+a warning is issued in such cases.
 }
   \item{thin}{
 Thinning value.
@@ -57,7 +59,7 @@ containing scaled data cloning standard errors (scaled by \code{sqrt(n.clones)})
 and \eqn{R_{hat}} values (as returned by \code{\link[coda]{gelman.diag}}).
 }
 \author{
-\enc{Pe'ter So'lymos}{Peter Solymos}, \email{solymos@ualberta.ca}
+Peter Solymos, \email{solymos@ualberta.ca}
 }
 \seealso{
 Underlying functions: \code{\link[rjags]{jags.model}}, \code{\link[rjags]{coda.samples}}

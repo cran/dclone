@@ -1,12 +1,19 @@
+## not using jagsModel and codaSamples so updated.model is without attribute
 jags.fit <-
-function(data, params, model, inits=NULL, n.chains=3, n.adapt=1000, n.update=0, thin=1, n.iter=5000, 
+function(data, params, model, inits=NULL, n.chains=3, n.adapt=1000, n.update=1000, thin=1, n.iter=5000, 
 updated.model=TRUE, ...)
 {
     ## stop if rjags not found
     if (!suppressWarnings(require(rjags)))
         stop("there is no package called 'rjags'")
+    if (n.adapt>0 && n.update==0)
+        warnings("consider updating for independence after adaptation")
     ## inital steps
-    n.clones <- nclones.list(data)
+    if (is.environment(data)) {
+        warnings("'data' was environment: it was coerced into a list")
+        data <- as.list(data)
+    }
+    n.clones <- dclone:::nclones.list(data)
     if (is.function(model) || inherits(model, "custommodel")) {
         if (is.function(model))
             model <- match.fun(model)
@@ -15,9 +22,11 @@ updated.model=TRUE, ...)
     }
     ## handling inits arg, model initialization
     m <- if (is.null(inits)) {
-        jags.model(model, data, n.chains=n.chains, n.adapt=n.adapt)
+        jags.model(model, data, n.chains=n.chains, n.adapt=n.adapt,
+            quiet=!as.logical(getOption("dcoptions")$verbose))
     } else {
-        jags.model(model, data, inits, n.chains=n.chains, n.adapt=n.adapt)
+        jags.model(model, data, inits, n.chains=n.chains, n.adapt=n.adapt,
+            quiet=!as.logical(getOption("dcoptions")$verbose))
     }
     if (is.null(list(...)$progress.bar)) {
         trace <- if (getOption("dcoptions")$verbose)
@@ -34,6 +43,9 @@ updated.model=TRUE, ...)
         res <- coda.samples(m, params, n.iter=n.iter, thin=thin, 
             progress.bar=trace, by=byval)
     } else {
+        if (!is.null(n.clones) && n.clones > 1) {
+            attr(m, "n.clones") <- n.clones
+        }
         return(m)
     }
     ## jags.model attribute
@@ -46,4 +58,3 @@ updated.model=TRUE, ...)
     }
     res
 }
-

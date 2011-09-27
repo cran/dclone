@@ -32,6 +32,7 @@ function(cl, data, params, model, inits = NULL, n.chains = 3, ...)
     cldata <- list(data=data, params=params, model=model, inits=inits)
     ## parallel function to evaluate by snowWrapper
     jagsparallel <- function(i, ...)   {
+        cldata <- as.list(get(".DcloneEnv", envir=.GlobalEnv))
         jags.fit(data=cldata$data, params=cldata$params, 
             model=cldata$model, 
             inits=cldata$inits[[i]], n.chains=1, updated.model=FALSE, ...)
@@ -45,9 +46,13 @@ function(cl, data, params, model, inits = NULL, n.chains = 3, ...)
         "load" else "none"
     dir <- if (inherits(cl, "SOCKcluster"))
         getwd() else NULL
-    mcmc <- snowWrapper(cl, 1:n.chains, jagsparallel, cldata, lib="dclone", 
-        balancing=balancing, size=1, 
-        rng.type=getOption("dcoptions")$RNG, cleanup=TRUE, dir=dir, ...)
+    ## do the work, dclone loaded only if not yet there  -- went into snowWrapper
+#    lib <- if ("dclone" %in% clusterEvalQ(cl, .packages())[[1]])
+#        NULL else "dclone"
+    mcmc <- snowWrapper(cl, 1:n.chains, jagsparallel, cldata, 
+        name=NULL, use.env=TRUE,
+        lib="dclone", balancing=balancing, size=1, 
+        rng.type=getOption("dcoptions")$RNG, cleanup=TRUE, dir=dir, unload=FALSE, ...)
     ## binding the chains
     res <- as.mcmc.list(lapply(mcmc, as.mcmc))
     ## attaching attribs and return
@@ -58,4 +63,3 @@ function(cl, data, params, model, inits = NULL, n.chains = 3, ...)
     }
     res
 }
-

@@ -1,5 +1,68 @@
 dclone package version history
 
+Version 1.4-0, September 28, 2011
+
+Version 1.3-6, September 7, 2011
+    * jags.fit return jags model with n.clones
+      attribute when n.iter=0.
+    * parJagsModel and parCodaSamples: passes the
+      n.clones info from data argument.
+    * jagsModel and codaSamples added as wrapper
+      around jags.model and coda.samples functions of
+      rjags package to track dclone information passed
+      through data argument and allow custommodel
+      specification of model argument (similarly to par* 
+      versions of similar functions).
+    * .onLoad added to zzz.R
+
+Version 1.3-5, August 23, 2011
+    * n.update=1000 is now the default instead of 0
+      to ensure independence after adaptation.
+      Warning is issued if n.adapt>0 and n.update=0.
+    * New argument partype added to dc.parfit,
+      possible options (balancing, parchains, both)
+      are described on the help page.
+    * dc.parfit gained args (update, updatefun, initsfun)
+      which are ignored if type is not "parchains".
+    * dc.fit and dc.parfit (with "parchains" type)
+      now call new internal function .dcFit (former dc.fit reworked
+      to allow parallel chains via jags.parfit).
+      This function is not exported by namespace, thus
+      not user visible and undocumented.
+    * dclone is loaded to workers by snowWrapper
+      only if .packages() does not contain it yet.
+    * dclone method for environmet added: it returns a cloned list.
+    * data argument can be environment,
+      it is coerced to a list for handling n.clones attribute.
+    * jags.fit: quiet argument of jags.model used along with
+      verbose dcoption to possibly suppress printout 
+      during compilation.
+    * Parallel functionality added replicating main rjags functions
+      to allow easy updating of jags model objects.
+      FUnctions added: parListModules, parLoadModule, parUnloadModule,
+      parListFactories, parSetFactory, parJagsModel, parUpdate,
+      parCodaSamples, parUpdate; with help pages taken and edited from
+      rjags package of M Plummer.
+    * .DcloneEnv is created at startup, and removed on unloading 
+      dclone. This is intended to store temporary stuff passed
+      to workers by snowWrapper.
+    * snowWrapper got new argument: unload=FALSE to unload
+      packaged from pkg argument.
+    * snowWrapper: if name=NULL, .DcloneEnv is used to store
+      temporary data.
+    * Data cloning compatibile jagsModel and codaSamples
+      function added for sequential computations.
+      Both functions copied after rjags equivalents,
+      jags.model and coda.samples.
+    * New method: pairs for mcmc.list objects. It plots
+      bivariate kernel density estimates and scatterplots
+      in a matrix with univariate densities as diagonal.
+    * dctable add object name even if length(n.clones)==1.
+    * initsfun handling in dc.parfit partly allowed,
+      this new feature is now documented, testing, Example added.
+    * All documented S3 methods are now exported by NAMESPACE
+      (dependent packages could not import them).
+
 Version 1.3-4, July 9, 2011
     * dc.fit: updating fixed (only updated after 2nd iteration).
     * dc.fit: updatefun and initsfun now accepts 2 arguments,
