@@ -11,6 +11,8 @@ export("dclone", "dcdim",
        "dcdiag", "extractdcdiag", 
        "lambdamax.diag", "chisq.diag",
        "dcoptions")
+## rjags remakes
+export("jagsModel", "codaSamples")
 
 ## parallel functions
 export("jags.parfit", "dc.parfit",
@@ -18,6 +20,10 @@ export("jags.parfit", "dc.parfit",
        "clusterSize", "plotClusterSize",
        "clusterSplitSB", 
        "parLapplySB", "parLapplySLB")
+## parallel rjags functions
+export("parListModules", "parLoadModule", "parUnloadModule",
+      "parListFactories", "parSetFactory", 
+      "parJagsModel", "parUpdate", "parCodaSamples")
 
 ## graphical helper functions
 export("errlines")
@@ -26,12 +32,35 @@ export("errlines")
 importFrom("stats", "quantile", "update")
 importFrom("coda", "as.mcmc.list")
 
-## methods for main dclone functions/classes
+## export methods for main dclone functions/classes
+export(dcsd.mcmc.list, 
+        coef.mcmc.list, 
+        confint.mcmc.list.dc, 
+        vcov.mcmc.list.dc, 
+        quantile.mcmc.list, 
+        dclone.default, 
+        dclone.list, 
+        dclone.environment, 
+        dclone.dcdim, 
+        dctable.default, 
+        extractdctable.default, 
+        plot.dctable, 
+        dcdiag.default, 
+        extractdcdiag.default, 
+        plot.dcdiag, 
+        errlines.default, 
+        nclones.list, 
+        nclones.default, 
+        pairs.mcmc.list, 
+        update.mcmc.list)
+
+## register methods for main dclone functions/classes
 S3method("nclones", "default")
 S3method("nclones", "list")
 S3method("dclone", "dcdim")
 S3method("dclone", "default")
 S3method("dclone", "list")
+S3method("dclone", "environment")
 S3method("dctable", "default")
 S3method("extractdctable", "default")
 S3method("dcdiag", "default")
@@ -44,6 +73,7 @@ S3method("vcov", "mcmc")
 S3method("quantile", "mcmc")
 S3method("as.mcmc.list", "bugs")
 S3method("print", "mcmc.list")
+S3method("pairs", "mcmc.list")
 S3method("quantile", "mcmc.list")
 S3method("coef", "mcmc.list")
 S3method("dcsd", "mcmc.list")
@@ -62,3 +92,4 @@ S3method("print", "custommodel")
 
 ## methods for helper functions/classes
 S3method("errlines", "default")
+

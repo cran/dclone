@@ -18,7 +18,8 @@ jags.parfit(cl, data, params, model, inits = NULL, n.chains = 3, ...)
 A cluster object created by \code{\link[snow]{makeCluster}}.
 }
   \item{data}{
-A named list or environment containing the data. If an environment, data cloning might not work properly (has to be done manually).
+A named list or environment containing the data. If an environment, \code{data}
+is coerced into a list so cloning will work properly.
 }
   \item{params}{
 Character vector of parameters to be sampled.
@@ -41,14 +42,21 @@ Other arguments passed to \code{\link[dclone]{jags.fit}}.
 }
 \details{
 Chains are run on parallel workers, and the results are combined in the end.
+After parallel computations, temporary objects passed to workers and
+the dclone package is cleaned up. It is not guaranteed
+that objects already on the workers and independently loaded packages
+are not affected. Best to start new instances beforehand.
 
 No update method is available for parallel \code{mcmc.list} objects.
+
+Additionally loaded JAGS modules (e.g. \code{"glm"}) need to be loaded
+to the workers. See Examples.
 }
 \value{
 An \code{mcmc.list} object.
 }
 \author{
-\enc{Pe'ter So'lymos}{Peter Solymos}, \email{solymos@ualberta.ca}
+Peter Solymos, \email{solymos@ualberta.ca}
 }
 \seealso{
 \code{\link[dclone]{jags.fit}}
@@ -72,8 +80,12 @@ glm.model <- function() {
     }
 }
 dat <- list(Y=Y, X=X, n=n, np=ncol(X))
+load.module("glm")
 m <- jags.fit(dat, "beta", glm.model)
 cl <- makeCluster(3, type = "SOCK")
+## load glm module
+tmp <- clusterEvalQ(cl, library(rjags))
+tmp <- clusterEvalQ(cl, load.module("glm"))
 pm <- jags.parfit(cl, dat, "beta", glm.model)
 ## chains are not identical -- this is good
 pm[1:2,]
