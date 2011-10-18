@@ -1,8 +1,7 @@
-## stop.if.converged = FALSE arg to break when all dcdiag criteria are met
 .dcFit <- 
-function(data, params, model, inits, n.clones, multiply=NULL, unchanged=NULL, 
-update=NULL, updatefun=NULL, initsfun=NULL, flavour = c("jags", "bugs"), 
-cl=NULL, parchains=FALSE, ...)
+function(data, params, model, inits, n.clones, multiply = NULL, unchanged = NULL, 
+update = NULL, updatefun = NULL, initsfun = NULL, flavour = c("jags", "bugs"), 
+n.chains=3, cl = NULL, parchains = FALSE, ...)
 {
     flavour <- match.arg(flavour)
     ## stop if rjags not found
@@ -17,12 +16,10 @@ cl=NULL, parchains=FALSE, ...)
         stop("'n.clones' argument must be provided")
     if (identical(n.clones, 1))
         stop("'n.clones = 1' gives the Bayesian answer, no need for DC")
-#    if (is.environment(data))
-#        stop("'data' should be list, not environment")
-#    if (is.environment(data)) {
-#        warnings("'data' was environment: it was coerced into a list")
-#        data <- as.list(data)
-#    }
+    if (is.environment(data)) {
+        warnings("'data' was environment: it was coerced into a list")
+        data <- as.list(data)
+    }
     ## determine k
     k <- n.clones[order(n.clones)]
     k <- unique(k)
@@ -61,12 +58,13 @@ cl=NULL, parchains=FALSE, ...)
         jdat <- dclone(data, k[i], multiply=multiply, unchanged=unchanged)
         if (flavour == "jags") {
             if (parchains) {
-                mod <- jags.parfit(cl, jdat, params, model, inits, ...)
+                mod <- jags.parfit(cl, jdat, params, model, inits, n.chains, ...)
             } else {
-                mod <- jags.fit(jdat, params, model, inits, ...)
+                mod <- jags.fit(jdat, params, model, inits, n.chains, ...)
             }
         } else {
-            mod <- bugs.fit(jdat, params, model, inits, format="mcmc.list", ...)
+            mod <- bugs.fit(jdat, params, model, inits, 
+                n.chains=n.chains, format="mcmc.list", ...)
         }
         ## dctable evaluation
         if (i == 1) {
@@ -97,7 +95,11 @@ cl=NULL, parchains=FALSE, ...)
         }
     }
     ## warning if R.hat < crit
-    if (nchain(mod) > 1 && any(dctmp[,"r.hat"] >= rhat.crit))
+    rhat.problem <- any(dctmp[,"r.hat"] >= rhat.crit)
+    if (any(is.na(rhat.problem))) {
+        rhat.problem[is.na(rhat.problem)] <- FALSE
+    }
+    if (nchain(mod) > 1 && rhat.problem)
         warning("chains convergence problem, see R.hat values")
     ## finalizing dctable attribute
     dcts <- lapply(dcts, function(z) as.data.frame(z))
@@ -107,6 +109,7 @@ cl=NULL, parchains=FALSE, ...)
     dcd <- t(as.data.frame(dcdr))
     rownames(dcd) <- 1:length(dcdr)
     dcd <- data.frame(dcd)
+    colnames(dcd) <- c("n.clones", "lambda.max", "ms.error", "r.squared", "r.hat") # went to dcdiag.default
     class(dcd) <- c("dcdiag", class(dcd))
     attr(mod, "dcdiag") <- dcd
     mod

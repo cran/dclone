@@ -1,6 +1,6 @@
 parJagsModel <-
-function(cl, name, file, data=sys.frame(sys.parent()), 
-inits, n.chains = 1, n.adapt=1000, quiet=FALSE) 
+function(cl, name, file, data = sys.frame(sys.parent()), 
+inits, n.chains = 1, n.adapt = 1000, quiet = FALSE) 
 {
     if (length(cl) != n.chains)
         stop("length(cl) must equal n.chains")
@@ -11,8 +11,18 @@ inits, n.chains = 1, n.adapt=1000, quiet=FALSE)
         on.exit(try(clean.jags.model(file)))
     }
     n.clones <- dclone:::nclones.list(as.list(data))
-    inits <- jags.model(file, data, inits, n.chains, 
-        n.adapt = 0)$state(internal = TRUE)
+    ## inits and RNGs
+    if ("lecuyer" %in% list.modules()) {
+        mod <- parListModules(cl)
+        for (i in 1:length(mod)) {
+            if (!("lecuyer" %in% mod[[i]]))
+                stop("'lecuyer' module must be loaded on workers")
+        }
+    }
+    inits <- if (missing(inits))
+        parallel.inits(n.chains=n.chains) else parallel.inits(inits, n.chains)
+#    inits <- jags.model(file, data, inits, n.chains, 
+#        n.adapt = 0)$state(internal = TRUE)
     cldata <- list(file=file, data=as.list(data), inits=inits,
         n.adapt=n.adapt, name=deparse(substitute(name)), quiet=quiet,
         n.clones=n.clones)
