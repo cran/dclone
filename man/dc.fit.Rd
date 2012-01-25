@@ -21,6 +21,10 @@ A named list (or environment) containing the data.
 }
   \item{params}{
 Character vector of parameters to be sampled.
+It can be a list of 2 vectors, 1st element
+is used as parameters to monitor, the 2nd is used
+as parameters to use in calculating the data cloning
+diagnostics.
 }
   \item{model}{
 Character string (name of the model file), a function containing the model, or a or \code{\link{custommodel}} object (see Examples).
@@ -208,6 +212,7 @@ mod <- dc.fit(dat, c("lambda","beta","sigma"), beverton.holt,
 summary(mod)
 
 ## Using WinBUGS/OpenBUGS
+if (.Platform$OS.type == "windows") {
 data(schools)
 dat <- list(J = nrow(schools), y = schools$estimate, sigma.y = schools$sd)
 bugs.model <- function(){
@@ -229,6 +234,7 @@ sim2 <- dc.fit(dat, param, bugs.model, n.clones=1:2,
     flavour="bugs", program="WinBUGS", multiply="J")
 sim3 <- dc.fit(dat, param, bugs.model, n.clones=1:2, 
     flavour="bugs", program="OpenBUGS", multiply="J")
+}
 }
 }
 \keyword{ models }

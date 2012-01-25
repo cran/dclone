@@ -17,13 +17,18 @@ partype=c("balancing", "parchains", "both"), ...)
 }
 \arguments{
   \item{cl}{
-A cluster object created by \code{\link[snow]{makeCluster}}.
+A cluster object created by \code{\link[snow]{makeCluster}}, or
+an integer. It can also be \code{NULL}, see \code{\link{snowWrapper}}.
 }
   \item{data}{
 A named list (or environment) containing the data.
 }
   \item{params}{
 Character vector of parameters to be sampled.
+It can be a list of 2 vectors, 1st element
+is used as parameters to monitor, the 2nd is used
+as parameters to use in calculating the data cloning
+diagnostics.
 }
   \item{model}{
 Character string (name of the model file), a function containing the model, or a or \code{\link{custommodel}} object (see Examples).
@@ -163,8 +168,8 @@ dat <- list(Y=Y, X=X, n=n, np=ncol(X))
 k <- 1:3
 ## sequential version
 dcm <- dc.fit(dat, "beta", glm.model, n.clones=k, multiply="n", unchanged="np")
-## parallel version with size balancing (default)
-cl <- makeCluster(3, type = "SOCK")
+## parallel version with snow
+cl <- makePSOCKcluster(3)
 pdcm1 <- dc.parfit(cl, dat, "beta", glm.model, n.clones=k, multiply="n", unchanged="np",
     partype="balancing")
 pdcm2 <- dc.parfit(cl, dat, "beta", glm.model, n.clones=k, multiply="n", unchanged="np",
@@ -176,8 +181,18 @@ summary(pdcm1)
 summary(pdcm2)
 summary(pdcm3)
 stopCluster(cl)
+## multicore type forking
+if (.Platform$OS.type != "windows") {
+mcdcm1 <- dc.parfit(3, dat, "beta", glm.model, n.clones=k, multiply="n", unchanged="np",
+    partype="balancing")
+mcdcm2 <- dc.parfit(3, dat, "beta", glm.model, n.clones=k, multiply="n", unchanged="np",
+    partype="parchains")
+mcdcm3 <- dc.parfit(3, dat, "beta", glm.model, n.clones=k, multiply="n", unchanged="np",
+    partype="both")
+}
 
 ## Using WinBUGS/OpenBUGS
+if (.Platform$OS.type == "windows") {
 data(schools)
 dat <- list(J = nrow(schools), y = schools$estimate, sigma.y = schools$sd)
 bugs.model <- function(){
@@ -195,12 +210,13 @@ inits <- function(){
          sigma.theta=runif(1, 0, 100))
 }
 param <- c("mu.theta", "sigma.theta")
-cl <- makeCluster(2, type = "SOCK")
+cl <- makePSOCKcluster(2)
 sim2 <- dc.parfit(cl, dat, param, bugs.model, n.clones=1:2, 
     flavour="bugs", program="WinBUGS", multiply="J")
 sim3 <- dc.parfit(cl, dat, param, bugs.model, n.clones=1:2, 
     flavour="bugs", program="OpenBUGS", multiply="J")
 stopCluster(cl)
+}
 
 ## simulation for Poisson GLMM with inits
 set.seed(1234)
@@ -236,7 +252,7 @@ function(model, n.clones) {
         beta=c(0,0))
 }
 ## make cluster
-cl <- makeSOCKcluster(2)
+cl <- makePSOCKcluster(2)
 ## pass global n variable used in ifun to workers
 tmp <- clusterExport(cl, "n")
 ## fit the model

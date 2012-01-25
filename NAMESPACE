@@ -19,7 +19,9 @@ export("jags.parfit", "dc.parfit",
        "clusterSize", "plotClusterSize",
        "clusterSplitSB", 
        "parLapplySB", "parLapplySLB",
-       "parallel.inits")
+       "parallel.inits",
+       "mclapplySB",
+       "evalParallelArgument")
 ## parallel rjags functions
 export("parListModules", "parLoadModule", "parUnloadModule",
       "parListFactories", "parSetFactory", 
@@ -28,8 +30,10 @@ export("parListModules", "parLoadModule", "parUnloadModule",
 export("errlines")
 
 ## import from other packages
-importFrom("stats", "quantile", "update")
+importFrom("stats", "quantile", "update", 
+      "coef", "vcov", "confint")
 importFrom("coda", "as.mcmc.list")
+importFrom("utils", "stack")
 
 ## export methods for main dclone functions/classes
 export(dcsd.mcmc.list, 
@@ -51,7 +55,8 @@ export(dcsd.mcmc.list,
         nclones.list, 
         nclones.default, 
         pairs.mcmc.list, 
-        update.mcmc.list)
+        update.mcmc.list,
+        stack.mcmc.list)
 
 ## register methods for main dclone functions/classes
 S3method("nclones", "default")
@@ -65,8 +70,11 @@ S3method("extractdctable", "default")
 S3method("dcdiag", "default")
 S3method("extractdcdiag", "default")
 S3method("updated.model", "mcmc.list")
+S3method("updated.model", "mcmc.list.dc")
 S3method("update", "mcmc.list")
+S3method("stack", "mcmc.list")
 
+S3method("[", "mcmc.list.dc")
 S3method("coef", "mcmc")
 S3method("vcov", "mcmc")
 S3method("quantile", "mcmc")

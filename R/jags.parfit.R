@@ -1,17 +1,25 @@
 jags.parfit <-
 function(cl, data, params, model, inits = NULL, n.chains = 3, ...)
 {
+    ## get defaults right for cl argument
+    cl <- evalParallelArgument(cl, quit=TRUE)
+    ## sequential evaluation falls back on jags.fit
+    if (is.null(cl)) {
+        return(jags.fit(data, params, model, 
+            inits = inits, n.chains = n.chains, ...))
+    }
+    ## parallel evaluation starts here
     ## stop if rjags not found
     if (!suppressWarnings(require(rjags)))
         stop("there is no package called 'rjags'")
-    if (!inherits(cl, "cluster"))
-        stop("'cl' must be a 'cluster' object")
     if (is.environment(data)) {
         warnings("'data' was environment: it was coerced into a list")
         data <- as.list(data)
     }
     trace <- getOption("dcoptions")$verbose
     ## eval args
+    if (!is.null(list(...)$updated.model))
+        stop("'updated.model' argument is not available for parallel computations")
     if (!is.null(list(...)$n.iter))
         if (list(...)$n.iter == 0)
             stop("'n.iter = 0' is not supported for parallel computations")
@@ -21,8 +29,8 @@ function(cl, data, params, model, inits = NULL, n.chains = 3, ...)
     if (is.function(model) || inherits(model, "custommodel")) {
         if (is.function(model))
             model <- match.fun(model)
-        ## write model only if SOCK cluster (shared memory)
-        if (inherits(cl, "SOCKcluster")) {
+        ## write model only if SOCK cluster or multicore (shared memory)
+        if (is.numeric(cl) || inherits(cl, "SOCKcluster")) {
             model <- write.jags.model(model)
             on.exit(try(clean.jags.model(model)))
         }

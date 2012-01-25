@@ -11,8 +11,11 @@
 parCodaSamples(cl, model, variable.names, n.iter, thin = 1, ...)
 }
 \arguments{
-  \item{cl}{a cluster object created by the \pkg{snow} package.}
-  \item{model}{a jags model object}
+  \item{cl}{
+    A cluster object created by \code{\link[snow]{makeCluster}}, or
+    an integer. It can also be \code{NULL}, see \code{\link{snowWrapper}}.
+  }
+  \item{model}{character, name of a jags model object}
   \item{variable.names}{a character vector giving the names of variables
     to be monitored}
   \item{n.iter}{number of iterations to monitor}
@@ -50,17 +53,17 @@ Y <- rnorm(N, mean = linpred, sd = sigma)
 jdata <- list(N = N, Y = Y, x = x)
 jpara <- c("alpha", "beta", "sigma")
 ## jags model on parallel workers
-cl <- makeSOCKcluster(3)
-parJagsModel(cl, name=res, file=model, data=jdata, 
+cl <- makePSOCKcluster(3)
+parJagsModel(cl, name="res", file=model, data=jdata, 
     n.chains = 3, n.adapt=1000)
-parUpdate(cl, res, n.iter=1000)
-m <- parCodaSamples(cl, res, jpara, n.iter=2000)
+parUpdate(cl, "res", n.iter=1000)
+m <- parCodaSamples(cl, "res", jpara, n.iter=2000)
 ## with data cloning
 dcdata <- dclone(list(N = N, Y = Y, x = x), 2, multiply="N")
-parJagsModel(cl, name=res2, file=model, data=dcdata, 
+parJagsModel(cl, name="res2", file=model, data=dcdata, 
     n.chains = 3, n.adapt=1000)
-parUpdate(cl, res2, n.iter=1000)
-m2 <- parCodaSamples(cl, res2, jpara, n.iter=2000)
+parUpdate(cl, "res2", n.iter=1000)
+m2 <- parCodaSamples(cl, "res2", jpara, n.iter=2000)
 nclones(m2)
 clusterEvalQ(cl, nclones(res2))
 stopCluster(cl)

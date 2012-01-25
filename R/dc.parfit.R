@@ -3,13 +3,23 @@ function(cl, data, params, model, inits, n.clones, multiply = NULL, unchanged = 
 update = NULL, updatefun = NULL, initsfun = NULL, flavour = c("jags", "bugs"), 
 n.chains = 3, partype = c("balancing", "parchains", "both"), ...)
 {
+    ## get defaults right for cl argument
+    cl <- evalParallelArgument(cl, quit=TRUE)
+    ## sequential evaluation falls back on dc.fit
+    if (is.null(cl)) {
+        return(dc.fit(data, params, model, inits, n.clones, 
+            multiply = multiply, unchanged = unchanged, 
+            update = update, updatefun = updatefun, 
+            initsfun = initsfun, flavour = flavour, 
+            n.chains = n.chains, ...))
+    }
+    ## parallel evaluation starts here
     flavour <- match.arg(flavour)
     ## stop if rjags not found
     if (flavour=="jags" && !suppressWarnings(require(rjags)))
         stop("there is no package called 'rjags'")
-    ## initail evals
-    if (!inherits(cl, "cluster"))
-        stop("'cl' must be a 'cluster' object")
+    if (!is.null(list(...)$updated.model))
+        stop("'updated.model' argument is not available for parallel computations")
     ## get parallel type
     partype <- match.arg(partype)
     ## some arguments are ignored with size balancing
@@ -61,6 +71,16 @@ n.chains = 3, partype = c("balancing", "parchains", "both"), ...)
                 warnings("arguments of 'initsfun' after position 2 are ingnored")
             INIARGS <- ian < 2
         } else INIARGS <- 0
+        ## params to use in jags.fit and in dcdiag
+        if (is.list(params)) {
+            params.diag <- params[[2]]
+            params <- params[[1]]
+        } else {
+            params.diag <- params
+        }
+        ## partype="both" is somehow denies to do it right
+        if (partype == "both" && !identical(params, params.diag))
+            stop("partype='both' cannot handle params as list")
         #### parallel part
         if (trace) {
             cat("\nParallel computation in progress\n\n")
@@ -70,8 +90,8 @@ n.chains = 3, partype = c("balancing", "parchains", "both"), ...)
         if (is.function(model) || inherits(model, "custommodel")) {
             if (is.function(model))
                 model <- match.fun(model)
-            ## write model only if SOCK cluster (shared memory)
-            if (inherits(cl, "SOCKcluster")) {
+        ## write model only if SOCK cluster or multicore (shared memory)
+        if (is.numeric(cl) || inherits(cl, "SOCKcluster")) {
                 model <- write.jags.model(model)
                 on.exit(try(clean.jags.model(model)))
             }
@@ -79,7 +99,8 @@ n.chains = 3, partype = c("balancing", "parchains", "both"), ...)
         ## common data 
         cldata <- list(data=data, params=params, model=model, inits=inits,
             multiply=multiply, unchanged=unchanged, k=k, 
-            INIARGS=INIARGS, initsfun=initsfun, n.chains=n.chains)
+            INIARGS=INIARGS, initsfun=initsfun, n.chains=n.chains,
+            params.diag=params.diag)
         ## parallel computations
         balancing <- if (!getOption("dcoptions")$LB)
             "size" else "both"
@@ -99,9 +120,12 @@ n.chains = 3, partype = c("balancing", "parchains", "both"), ...)
                     bugs.fit(data=jdat, params=cldata$params, model=cldata$model, inits=INITS, 
                         format="mcmc.list", ...)
                 }
+                vn <- varnames(mod)
+                params.diag <- vn[unlist(lapply(cldata$params.diag, grep, x=vn))]
                 if (i == max(k))
                     return(mod) else return(list(dct=dclone:::extractdctable(mod), 
-                        dcd=dclone:::extractdcdiag(mod)))
+                        dcd=dclone:::extractdcdiag(mod[,params.diag])))
+#                        dcd=dclone:::extractdcdiag(mod)))
             }
             pmod <- snowWrapper(cl, k, dcparallel, cldata, name=NULL, use.env=TRUE,
                 lib="dclone", balancing=balancing, size=k, 
@@ -112,7 +136,10 @@ n.chains = 3, partype = c("balancing", "parchains", "both"), ...)
             dct[[times]] <- extractdctable(mod)
             ## dcdiag
             dcd <- lapply(1:(times-1), function(i) pmod[[i]]$dcd)
-            dcd[[times]] <- extractdcdiag(mod)
+            vn <- varnames(mod)
+            params.diag <- vn[unlist(lapply(params.diag, grep, x=vn))]
+            dcd[[times]] <- extractdcdiag(mod[,params.diag])
+#            dcd[[times]] <- extractdcdiag(mod)
         ## balancing+parchains
         } else {
             ## RNG and initialization
@@ -168,6 +195,10 @@ n.chains = 3, partype = c("balancing", "parchains", "both"), ...)
             ## dctable
             dct <- lapply(pmod, extractdctable)
             ## dcdiag
+## partype="both" is somehow denies to do it right
+#            vn <- varnames(mod)
+#            params.diag <- vn[unlist(lapply(params.diag, grep, x=vn))]
+#            dcd <- lapply(pmod, function(z) extractdcdiag(z[,params.diag]))
             dcd <- lapply(pmod, extractdcdiag)
         }
         ## warning if R.hat < crit
