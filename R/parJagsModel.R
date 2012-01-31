@@ -2,16 +2,14 @@ parJagsModel <-
 function(cl, name, file, data = sys.frame(sys.parent()), 
 inits, n.chains = 1, n.adapt = 1000, quiet = FALSE) 
 {
-    if (!suppressWarnings(require(rjags)))
-        stop("there is no package called 'rjags'")
     ## stop if rjags not found
     if (!suppressWarnings(require(rjags)))
         stop("there is no package called 'rjags'")
     cl <- evalParallelArgument(cl, quit=TRUE)
     if (!inherits(cl, "cluster"))
         stop("cl must be of class 'cluster'")
-    if (length(cl) != n.chains)
-        stop("length(cl) must equal n.chains")
+    if (length(cl) < n.chains)
+        stop("length(cl) < n.chains")
     if (is.function(file) || inherits(file, "custommodel")) {
         if (is.function(file))
             file <- match.fun(file)
@@ -53,7 +51,7 @@ inits, n.chains = 1, n.adapt = 1000, quiet = FALSE)
         getwd() else NULL
     snowWrapper(cl, 1:n.chains, jagsparallel, cldata, 
         name=NULL, use.env=TRUE,
-        lib = "dclone", balancing = "none", size = 1, 
+        lib = c("dclone", "rjags"), balancing = "none", size = 1, 
         rng.type = getOption("dcoptions")$RNG, 
         cleanup = TRUE, dir = dir, unload=FALSE)
 }

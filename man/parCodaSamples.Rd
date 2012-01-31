@@ -1,8 +1,9 @@
 \name{parCodaSamples}
 \alias{parCodaSamples}
-\title{Generate posterior samples in mcmc.list format on parallel workers}
+\title{Generate posterior samples in 'mcmc.list' 
+format on parallel workers}
 \description{
-  This is function sets a trace
+  This function sets a trace
   monitor for all requested nodes, updates the model on each
   workers. Finally, it return the chains to the master and coerces the
   output to a single \code{mcmc.list} object.
@@ -13,7 +14,8 @@ parCodaSamples(cl, model, variable.names, n.iter, thin = 1, ...)
 \arguments{
   \item{cl}{
     A cluster object created by \code{\link[snow]{makeCluster}}, or
-    an integer. It can also be \code{NULL}, see \code{\link{snowWrapper}}.
+    an integer. It can also be \code{NULL}, see 
+    \code{\link{snowWrapper}}.
   }
   \item{model}{character, name of a jags model object}
   \item{variable.names}{a character vector giving the names of variables
@@ -27,7 +29,12 @@ parCodaSamples(cl, model, variable.names, n.iter, thin = 1, ...)
   An \code{mcmc.list} object with possibly an \code{n.clones} attribute.
 }
 \author{Peter Solymos, \email{solymos@ualberta.ca}}
-\seealso{\code{\link[rjags]{coda.samples}}, \code{\link{codaSamples}}}
+\seealso{
+Original sequential function in \pkg{rjags}: 
+\code{\link[rjags]{coda.samples}}
+
+Sequential \pkg{dclone}-ified version: \code{\link{codaSamples}}
+}
 \examples{
 \dontrun{
 model <- function() {
@@ -53,19 +60,23 @@ Y <- rnorm(N, mean = linpred, sd = sigma)
 jdata <- list(N = N, Y = Y, x = x)
 jpara <- c("alpha", "beta", "sigma")
 ## jags model on parallel workers
-cl <- makePSOCKcluster(3)
+## n.chains must be <= no. of workers
+cl <- makePSOCKcluster(4)
 parJagsModel(cl, name="res", file=model, data=jdata, 
-    n.chains = 3, n.adapt=1000)
+    n.chains = 2, n.adapt=1000)
 parUpdate(cl, "res", n.iter=1000)
 m <- parCodaSamples(cl, "res", jpara, n.iter=2000)
+stopifnot(2==nchain(m))
 ## with data cloning
 dcdata <- dclone(list(N = N, Y = Y, x = x), 2, multiply="N")
 parJagsModel(cl, name="res2", file=model, data=dcdata, 
-    n.chains = 3, n.adapt=1000)
+    n.chains = 2, n.adapt=1000)
 parUpdate(cl, "res2", n.iter=1000)
 m2 <- parCodaSamples(cl, "res2", jpara, n.iter=2000)
+stopifnot(2==nchain(m2))
 nclones(m2)
-clusterEvalQ(cl, nclones(res2))
+## note: only 2 chanis were run on 2 workers!
+clusterEvalQ(cl, if (exists("res2")) nclones(res2))
 stopCluster(cl)
 }
 }

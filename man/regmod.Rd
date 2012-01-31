@@ -7,7 +7,7 @@
 Exemplary MCMC list object
 }
 \description{
-This data set was done via the code for \code{\link{jags.fit}} function.
+This data set was made via the \code{\link{jags.fit}} function.
 }
 \usage{data(regmod)}
 \source{
@@ -45,7 +45,8 @@ jdata <- list(N = N, Y = Y, x = x)
 ## what to monitor
 jpara <- c("alpha", "beta", "sigma")
 ## fit the model with JAGS
-regmod <- jags.fit(jdata, jpara, jfun, n.chains = 3)
+regmod <- jags.fit(jdata, jpara, jfun, n.chains = 3,
+    updated.model = FALSE)
 }
 }
 \keyword{datasets}
