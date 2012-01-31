@@ -9,8 +9,8 @@ n.chains=3, cl = NULL, parchains = FALSE, ...)
         stop("there is no package called 'rjags'")
     if (parchains && flavour=="bugs")
         stop("flavour='bugs' not supported with parallel chains")
-    if (parchains && is.null(cl))
-        stop("cl cannot be NULL with parchains=TRUE")
+#    if (parchains && is.null(cl))
+#        stop("cl cannot be NULL with parchains=TRUE")
     ## initail evals
     if (missing(n.clones))
         stop("'n.clones' argument must be provided")
@@ -45,6 +45,13 @@ n.chains=3, cl = NULL, parchains = FALSE, ...)
         if (ian > 2)
             warnings("arguments of 'initsfun' after position 2 are ingnored")
         INIARGS <- ian < 2
+    }
+    ## params to use in jags.fit and in dcdiag
+    if (is.list(params)) {
+        params.diag <- params[[2]]
+        params <- params[[1]]
+    } else {
+        params.diag <- params
     }
     ## list for dcdiag results
     dcdr <- list()
@@ -89,7 +96,13 @@ n.chains=3, cl = NULL, parchains = FALSE, ...)
                     initsfun(mod) else initsfun(mod, k[i+1])
         }
         dctmp <- dclone:::extractdctable.default(mod)
-        dcdr[[i]] <- dclone:::extractdcdiag.default(mod)
+        ## params.diag needs to subset varnames and not params
+        if (i == 1) {
+            vn <- varnames(mod)
+            params.diag <- vn[unlist(lapply(params.diag, grep, x=vn))]
+        }
+        dcdr[[i]] <- dclone:::extractdcdiag.default(mod[,params.diag])
+#        dcdr[[i]] <- dclone:::extractdcdiag.default(mod)
         for (j in 1:length(vn)) {
             dcts[[j]][i,-1] <- dctmp[j,]
         }
@@ -109,7 +122,8 @@ n.chains=3, cl = NULL, parchains = FALSE, ...)
     dcd <- t(as.data.frame(dcdr))
     rownames(dcd) <- 1:length(dcdr)
     dcd <- data.frame(dcd)
-    colnames(dcd) <- c("n.clones", "lambda.max", "ms.error", "r.squared", "r.hat") # went to dcdiag.default
+    ## this next line went to dcdiag.default, but strange things happen with 1 param case
+    colnames(dcd) <- c("n.clones", "lambda.max", "ms.error", "r.squared", "r.hat")
     class(dcd) <- c("dcdiag", class(dcd))
     attr(mod, "dcdiag") <- dcd
     mod

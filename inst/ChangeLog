@@ -1,11 +1,61 @@
 dclone package version history
 
+Version 1.7-0, January 25, 2012
+    * Preparing for major CRAN release.
+
+Version 1.6-0, December 19, 2011
+    * Depends on parallel and R >= 2.14.0 for multicore type 
+      forking on Linux/Unix machines. Heavy lifting is
+      still done by showWrapper for easy transitioning.
+    * parallel is now a dependency, snow is suggested only.
+    * list type declaration of params argument not working
+      with partype="both" in dc.parfit. This option is
+      defunct at the moment.
+    * Windows specific suggested packages removed from dependency
+      list due to seamless Linux based testing of 
+      forking type parallel features (rsprng, BRugs).
+    * cl argument in parallelized functions that
+      use snowWrapper can be NULL in which case it 
+      takes the value from the mc.cores global option 
+      getOption("mc.cores"). If mc.cores is not set (NULL)
+      of 1, an error is produced.
+    * mclapplySB added to mimic size balancing with forking.
+    * parJagsModel, parUpdate and parCodaSamples works
+      only with snow clusters.
+    * updated.model.mcmc.list.dc: keeps n.clones attribute.
+    * evalParallelArgument added for consistent handling
+      of parallel arguments.
+    * jags.parfit and dc.parfit falls back to sequential
+      evaluation if cl is NULL (and default options for 
+      parallel processing are unset) or 1.
+    * stack method for mcmc.list objects to facilitate
+      creating graphics with lattice and ggplot2. 
+      Experimental ggplot2 based plotting functions are in 
+      dcextras package on R-Forge.
+    * The package was extensively tested on Windows XP and 7
+      (32 and 64 bit) and Ubuntu Linux 11.10 using
+      JAGS, OpenBUGS and WinBUGS (latter only on Windows).
+      For testing suite see /devel on R-Forge.
+
+Version 1.5-1, October 18, 2011
+    * "[.mcmc.list.dc" addted to extract parts of a fitted object
+      and retain its n.clones attribute (no other attributes
+      though, e.g. dcdiag, dctable, updated.model).
+    * params argument in dc.*fit can take a 2 element
+      list. Union of the 2 vectors will be used as
+      parameters to monitor (as in jags.fit),
+      while the 2nd element of the list is used
+      to calculate statistics in dcdiag().
+      This way transformations of nodes or
+      the deviance monitor won't be used in
+      diagnostic tests.
+
 Version 1.5-0, October 17, 2011
     * Major CRAN release with improved parallel features
       (double initialization overhead is removed); 
       with bugfixes from devel versions.
     * The package also has bee extensively tested using 
-      CLassic BUGS examples (see ChangeLog for dcmle package).
+      Classic BUGS examples (see ChangeLog for dcmle package).
 
 Version 1.4-2, October 16, 2011
     * New function: parallel.inits make use of rjags:::parallelseeds 

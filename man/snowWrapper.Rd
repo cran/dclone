@@ -10,15 +10,17 @@ Parallel wrapper function to call from within a function
 designed to work closely with MCMC fitting functions (can be called from inside of a function).
 }
 \usage{
-snowWrapper(cl, seq, fun, cldata, name = "cldata", use.env=FALSE, 
+snowWrapper(cl, seq, fun,  
+cldata, name = "cldata", use.env=FALSE, 
 lib = NULL, dir = NULL, evalq=NULL,
 size = 1, balancing = c("none", "load", "size", "both"), 
 rng.type = c("none", "RNGstream", "SPRNG"), 
-cleanup = TRUE, unload = FALSE, ...)
+cleanup = TRUE, unload = FALSE, envir = .GlobalEnv, ...)
 }
 \arguments{
   \item{cl}{
-A cluster object created by \code{\link[snow]{makeCluster}}.
+A cluster object created by \code{\link[snow]{makeCluster}}, or
+an integer. It can also be \code{NULL}, see Details.
 }
   \item{seq}{
 A vector to split.
@@ -57,6 +59,7 @@ Vector of problem sizes (or relative performance information) corresponding to e
 }
   \item{rng.type}{
 Character, \code{"none"} or the type of RNG on the workers (see \code{\link[snow]{clusterSetupRNG}}).
+The logical value \code{!(rng.type == "none")} is used for forking (e.g. when \code{cl} is integer).
 }
   \item{cleanup}{
 logical, if \code{cldata} should be removed from the workers after applying \code{fun}.
@@ -65,11 +68,19 @@ If \code{TRUE}, effects of \code{dir} argument is also cleaned up.
   \item{unload}{
 logical, if \code{pkg} should be unloaded after applying \code{fun}.
 }
+  \item{envir}{
+environment to use when assigning data values.
+}
   \item{\dots}{
 Other arguments of \code{fun}, that are simple values and not objects. (Arguments passed as objects should be specified in \code{cldata}, otherwise not exported to the cluster.)
 }
 }
 \details{
+The function uses 'snow' type clusters when \code{cl} is a cluster object.
+The function uses 'multicore' type forking (shared memory) when \code{cl} is an integer.
+The value from \code{getOption("mc.cores")} is used if the argument is \code{NULL} 
+(it is an error to supply \code{cl = NULL} when \code{"mc.cores"} is 1 or not set).
+
 The function sets the random seeds, loads packages \code{lib} onto the cluster, sets the working directory as \code{dir}, exports \code{cldata} and evaluates \code{fun} on \code{seq}.
 
 No balancing (\code{balancing = "none"}) means, that the problem is splitted into roughly equal
@@ -107,7 +118,7 @@ Optimizing the number of workers: \code{\link{clusterSize}}, \code{\link{plotClu
 }
 \examples{
 \dontrun{
-cl <- makeSOCKcluster(2)
+cl <- makePSOCKcluster(2)
 ## wrapper
 fun <- function(i) cldata$a * i - cldata$b
 cldata <- list(a=10, b=5)

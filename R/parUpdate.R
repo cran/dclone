@@ -1,7 +1,15 @@
 parUpdate <-
 function(cl, object, n.iter = 1, ...) 
 {
-    cldata <- list(n.iter=n.iter, name=deparse(substitute(object)))
+    ## stop if rjags not found
+    if (!suppressWarnings(require(rjags)))
+        stop("there is no package called 'rjags'")
+    cl <- evalParallelArgument(cl, quit=TRUE)
+    if (!inherits(cl, "cluster"))
+        stop("cl must be of class 'cluster'")
+    if (!is.character(object))
+        object <- as.character(object) # deparse(substitute(object))
+    cldata <- list(n.iter=n.iter, name=object)
     jagsparallel <- function(i, ...) {
         cldata <- as.list(get(".DcloneEnv", envir=.GlobalEnv))
         res <- get(cldata$name, envir=.GlobalEnv)
