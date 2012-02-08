@@ -1,8 +1,6 @@
 parCodaSamples <-
 function(cl, model, variable.names = NULL, n.iter, thin = 1, ...) 
 {
-    if (!suppressWarnings(require(rjags)))
-        stop("there is no package called 'rjags'")
     ## stop if rjags not found
     if (!suppressWarnings(require(rjags)))
         stop("there is no package called 'rjags'")
@@ -14,6 +12,8 @@ function(cl, model, variable.names = NULL, n.iter, thin = 1, ...)
     cldata <- list(variable.names=variable.names,
         n.iter=n.iter, thin=thin, name=model)
     jagsparallel <- function(i, ...) {
+        if (!exists(cldata$name, envir=.GlobalEnv))
+            return(NULL)
         cldata <- as.list(get(".DcloneEnv", envir=.GlobalEnv))
         res <- get(cldata$name, envir=.GlobalEnv)
         n.clones <- nclones(res)
@@ -32,6 +32,7 @@ function(cl, model, variable.names = NULL, n.iter, thin = 1, ...)
         lib = "dclone", balancing = "none", size = 1, 
         rng.type = getOption("dcoptions")$RNG, 
         cleanup = TRUE, dir = dir, unload=FALSE, ...)
+    res <- res[!sapply(res, is.null)]
     n.clones <- lapply(res, nclones)
     if (length(unique(unlist(n.clones))) != 1L) {
         n.clones <- NULL
