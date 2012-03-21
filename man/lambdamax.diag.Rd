@@ -3,6 +3,8 @@
 \Rdversion{1.1}
 \alias{lambdamax.diag}
 \alias{chisq.diag}
+\alias{lambdamax.diag.mcmc.list}
+\alias{chisq.diag.mcmc.list}
 \title{
 Data Cloning Diagnostics
 }
@@ -11,12 +13,18 @@ These functions calculates diagnostics for evaluating data cloning
 convergence.
 }
 \usage{
-lambdamax.diag(x)
-chisq.diag(x)
+lambdamax.diag(x, ...)
+\method{lambdamax.diag}{mcmc.list}(x, ...)
+
+chisq.diag(x, ...)
+\method{chisq.diag}{mcmc.list}(x, ...)
 }
 \arguments{
   \item{x}{
   An object of class \code{mcmc} or \code{mcmc.list}.
+}
+  \item{\dots}{
+Other arguments to be passed.
 }
 }
 \details{
