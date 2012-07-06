@@ -1,5 +1,5 @@
-6f108cf15ade4e5ca476e8758d5ad668 *DESCRIPTION
-431c43df2adb29ddef43750a12bc4807 *NAMESPACE
+59560df33fd049bec3265e5151a606c4 *DESCRIPTION
+ed54ab61a261e20fa58968b724ee4ff8 *NAMESPACE
 02b075807ba8eb0c2e43511b450b0407 *R/Extract.mcmc.list.dc.R
 364e0697d11b511e9f51f00d8e2be030 *R/as.mcmc.list.bugs.R
 9c6be7ed2141e766c6ece9128aadf278 *R/bugs.fit.R
@@ -19,8 +19,10 @@ f784237491a42eb5c59b73a7c3b0aedc *R/custommodel.R
 ac892fb132cf5e88a9a11e6c2f546c1a *R/dcdiag.R
 6162d4180bc29bdaccd67961ae9329af *R/dcdiag.default.R
 e28fd1c430afa7342c59a985f7794b14 *R/dcdim.R
+88ef032b815750848ea5a785136b139f *R/dciid.R
 08ede667633c4ce72b7553a5fda6489f *R/dclone.R
 3d79a5769400a6960bb04e3cbf16aa22 *R/dclone.dcdim.R
+caa47f8bb7ceb4cdefbab1f51ea8ffa5 *R/dclone.dciid.R
 9143085193af84cfa5e95c4adcb41d8f *R/dclone.default.R
 35d07dd87a9e30540ac312c7263b180f *R/dclone.environment.R
 999e61b44bc3d127d108d7027ed629fc *R/dclone.list.R
@@ -85,7 +87,7 @@ fbf0d224f378fa5e32ad48421910fa13 *R/write.jags.model.R
 3e81a37a378949841ad441e5ea9b7970 *data/ovenbird.rda
 b57576309463252ce352c3dfe66ae46e *data/regmod.rda
 240058c13c56da7c98348eac6b81d212 *inst/CITATION
-05aa29feabc5e5978cb22f9837d9a6be *inst/ChangeLog
+a52bbfcb3792a38e49de39a9a145d27b *inst/ChangeLog
 dc615c815e31845e94abd41e3cc1b79f *man/bugs.fit.Rd
 306085fdd15553ee42c3cb2d4790fce2 *man/clusterSize.Rd
 a1e14dcbf35d98083c7edc1ccbd79ae5 *man/clusterSplitSB.Rd
@@ -93,8 +95,8 @@ f4b0ef207e3f6d80a365f2d661a84bad *man/codaSamples.Rd
 f3256f955e4d108fba0d53744c578ad7 *man/coef.mcmc.list.Rd
 0e5a646e8ce65255c0cce9dcbbd40a94 *man/dc.fit.Rd
 d71d23c46199436c4c0152c3d2692439 *man/dc.parfit.Rd
-4a0232e2cb2e3424dcea9497b273cda2 *man/dclone-package.Rd
-721b3ff94dd3ee2975a1a4def0d1a7ba *man/dclone.Rd
+4b32e36e554181135170626e3c92911c *man/dclone-package.Rd
+4eeac4550dba6282bffc4da0e9f376d3 *man/dclone.Rd
 fd94deb79f4cd27f7961889ddf935f24 *man/dcoptions.Rd
 dba60749e532d640f5df235e57f509bb *man/dctable.Rd
 3603744b8848fbe77ac1be1c4d5b7aa8 *man/errlines.Rd
