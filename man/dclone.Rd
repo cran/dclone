@@ -6,7 +6,9 @@
 \alias{dclone.list}
 \alias{dclone.environment}
 \alias{dclone.dcdim}
+\alias{dclone.dciid}
 \alias{dcdim}
+\alias{dciid}
 \title{
 Cloning R objects
 }
@@ -18,11 +20,13 @@ leaving the original structure of the object intact (in most of the cases).
 dclone(x, n.clones=1, ...)
 \method{dclone}{default}(x, n.clones = 1, attrib=TRUE, ...)
 \method{dclone}{dcdim}(x, n.clones = 1, attrib=TRUE, ...)
+\method{dclone}{dciid}(x, n.clones = 1, attrib=TRUE, ...)
 \method{dclone}{list}(x, n.clones = 1, 
     multiply = NULL, unchanged = NULL, attrib=TRUE, ...)
 \method{dclone}{environment}(x, n.clones = 1, 
     multiply = NULL, unchanged = NULL, attrib=TRUE, ...)
 dcdim(x, drop = TRUE, perm = NULL)
+dciid(x, iid=character(0))
 }
 \arguments{
   \item{x}{
@@ -49,6 +53,11 @@ an array if that have only one level.
   \item{perm}{
 The subscript permutation value, if the cloning dimension is not the last.
 }
+  \item{iid}{
+Character (or optionaly numeric or logical).
+Column(s) to be treated as i.i.d. observations. 
+Ignored when \code{x} is a vector.
+}
   \item{\dots}{
 Other arguments passed to function.
 }
@@ -74,6 +83,12 @@ but othervise repeat the observations (e.g. in case of time series,
 or for addressing special
 indexing conventions in the \code{BUGS} code, see examples 
 \code{dcdim} and \code{dclone.dcdim}).
+
+(5) Repeat pattern (i.i.d.): this is useful for example when
+a grouping variable is considered, and more i.i.d. groups are to be 
+added to the data set. E.g. \code{c(1, 1, 2, 2)} is to be cloned as
+\code{c(1, 1, 2, 2, 3, 3, 4, 4)} instead of 
+\code{c(1, 1, 2, 2, 1, 1, 2, 2)}.
 }
 \value{
 An object with class attributes \code{"dclone"} plus the original 
@@ -85,6 +100,16 @@ integer for number of clones.
 \code{dcdim} sets the class attribute of an object to \code{"dcdim"}, 
 thus \code{dclone} will clone the object by adding an extra dimension 
 for the clones.
+
+\code{dciid} sets the class attribute of an object to \code{"dciid"}, 
+thus \code{dclone} will clone the object by treating columns
+defined by the \code{iid} argument as i.i.d. observations.
+These columns must be numeric.
+This aims to facilitates working with the \pkg{INLA}
+package to generate approximate marginals based on DC.
+Columns specified by \code{iid} will be replaced by an increasing
+sequence of values respecting possible grouping structure (see
+Examples).
 
 Lists (i.e. BUGS data objects) are handled differently to enable element 
 specific determination of the mode of cloning. This can be done via the 
@@ -139,5 +164,12 @@ dclone(l, 2, multiply = "n", unchanged = "p")
 ## time series like usage of dcdim
 z <- data.matrix(rnorm(10))
 dclone(dcdim(z), 2)
+## usage if dciid
+ll <- dciid(data.frame(x=1:10, y=1:10), iid="y")
+dclone(ll, 2)
+## respecting grouping structure in iid
+ll$y <- rep(1:5, each=2)
+(dci <- dclone(ll, 2))
+nclones(dci)
 }
 \keyword{ manip }
