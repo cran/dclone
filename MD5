@@ -1,4 +1,4 @@
-59560df33fd049bec3265e5151a606c4 *DESCRIPTION
+fa35ed043007d765e8dc607409039f98 *DESCRIPTION
 ed54ab61a261e20fa58968b724ee4ff8 *NAMESPACE
 02b075807ba8eb0c2e43511b450b0407 *R/Extract.mcmc.list.dc.R
 364e0697d11b511e9f51f00d8e2be030 *R/as.mcmc.list.bugs.R
@@ -15,7 +15,7 @@ a27d4b98c50a985a3cb44d7f7ada108c *R/coef.mcmc.list.R
 f784237491a42eb5c59b73a7c3b0aedc *R/custommodel.R
 19609e5653227c8bbdd6e2c430df7c9c *R/dc.fit.R
 07afe6f8f39376ebaa79f586de04b139 *R/dc.parfit.R
-3c85d9b5047b54e35ceb466ea6dd41c2 *R/dcFit.R
+51f70138fc2d4aad59809a14fbd04846 *R/dcFit.R
 ac892fb132cf5e88a9a11e6c2f546c1a *R/dcdiag.R
 6162d4180bc29bdaccd67961ae9329af *R/dcdiag.default.R
 e28fd1c430afa7342c59a985f7794b14 *R/dcdim.R
@@ -64,7 +64,7 @@ bc44fc964e90fdbdd151c4ff82e7a5d8 *R/parJagsModel.R
 5ae9cb84ac2acf71c41d6a4398fb11b3 *R/plot.chisq.diag.R
 39064e2571d55eaa10ec9e00d1fb2bc4 *R/plot.dcdiag.R
 61425dbaa98074b1f74de05b60b01a3a *R/plot.dctable.R
-4029cef5cc6609893b30083309535d50 *R/plotClusterSize.R
+c5c50fb08cd2d0c3a0e1c59ad14286ba *R/plotClusterSize.R
 b15f4f4fcf75c0537b788b544670a9e5 *R/print.chisq.diag.R
 acfb4b66f450e4cf203ed59f69a519d5 *R/print.custommodel.R
 e48d91af3a7ac8d42cb0d379d2b12e2e *R/print.lambdamax.diag.R
@@ -87,7 +87,7 @@ fbf0d224f378fa5e32ad48421910fa13 *R/write.jags.model.R
 3e81a37a378949841ad441e5ea9b7970 *data/ovenbird.rda
 b57576309463252ce352c3dfe66ae46e *data/regmod.rda
 240058c13c56da7c98348eac6b81d212 *inst/CITATION
-a52bbfcb3792a38e49de39a9a145d27b *inst/ChangeLog
+9f863c36cd4f42f41ded3cb035d932af *inst/ChangeLog
 dc615c815e31845e94abd41e3cc1b79f *man/bugs.fit.Rd
 306085fdd15553ee42c3cb2d4790fce2 *man/clusterSize.Rd
 a1e14dcbf35d98083c7edc1ccbd79ae5 *man/clusterSplitSB.Rd
