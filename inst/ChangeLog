@@ -1,5 +1,53 @@
 dclone package version history
 
+Version 2.0-0, Sept 27, 2013
+    * Parallel functions (parJagsModel, parUpdate, parCodaSamples)
+      triggered a Note by R CMD check for modifying the global 
+      environment. This is now resolved as described below.
+    * New function: parDosa (meaning: wolf spider). This
+      replaces the snowWrapper. It comes with 2 hidden environments
+      (.DcloneEnvModel, .DcloneEnvResults) defined as global variables.
+      The .DcloneEnvModel is meant to store temporary objects
+      for model fitting, and swiped clean after use.
+      The .DcloneEnvResults is meant to store result objects on the 
+      workers.
+    * These environments come with functions for manipulating them: 
+      pullDcloneEnv, pushDcloneEnv, clearDcloneEnv, listDcloneEnv,
+      existsDcloneEnv.
+    * snowWraper is now deprecated with a warning.
+    * R2OpenBUGS added to DESCRIPTION as suggested package.
+    * R2WinBUGS::* notation explicitly added to avoid clashes
+      with R2OpenBUGS.
+    * The program="openbugs" in bugs.fit now calls R2OpenBUGS::bugs
+      instead of R2WinBUGS::openbugs. The latter can be
+      achieved by program="brugs" and gives a warning the
+      "openbugs" via R2WinBUGS is the preferred interface.
+      The reason is that as.mcmc.list.bug coercion produces
+      slightly different ts attributes under BRugs.
+      WinBUGS (via R2WinBUGS) and R2OpenBUGS implementations
+      give consistent ts attributes and can be seamlessly coerced
+      into mcmc.list object, which is the preferred format for dclone.
+    * bugs.parfit: new-old function from extras directory.
+      This is for parallel computations. See help file for
+      details on suggested best practices.
+    * dc.parfit: now allows flavour="bugs" for all partypes options.
+    * Removed reference to parallel:::.reg default cluster.
+    * SystemRequirements in DESCRIPTION changed to 'one or more of ...'.
+    * rjags related functions call requireNamespace("rjags")
+      instead of require(rjags).
+    * Depends on R 2.15.1 because of the declaration of global
+      variables .DcloneEnvModel and .DcloneEnvResults.
+
+Version 1.8-2, March 4, 2013
+    * custommodel: splits length 1 character model by '\n'.
+      This is the type of model specification that is used
+      in STAN related examples.
+    * New cloning option added: dctr, allows cloning column-wise.
+      This change was motivated by some STAN related data specification
+      difficulties.
+    * dctable: failed when mcmc.list had 1 parameter.
+      This is now fixed by using varnames(x, allow.null=FALSE).
+
 Version 1.8-1, September 3, 2012
     * clusterSplit now checks inheritence of its cl argument in
       R-devel (2.16.0 to be), as a result plotClusterSize

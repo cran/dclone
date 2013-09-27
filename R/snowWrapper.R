@@ -5,6 +5,8 @@ size = 1, balancing = c("none", "load", "size", "both"),
 rng.type = c("none", "RNGstream", "SPRNG"), 
 cleanup = TRUE, unload = FALSE, envir = .GlobalEnv, ...)
 {
+    warning("'snowWrapper' IS DEPRECATED. USE 'parDosa' INSTEAD!")
+
     ## get defaults right for cl argument
     cl <- evalParallelArgument(cl, quit=TRUE)
 ## common stuff for snow and multicore
@@ -65,6 +67,8 @@ cleanup = TRUE, unload = FALSE, envir = .GlobalEnv, ...)
         if (cleanup) {
             ## remove cldata by name
             eval(parse(text=paste("clusterEvalQ(cl, rm(", name, "))")))
+#            if (!use.env)
+#                eval(parse(text=paste("clusterEvalQ(cl, rm(", name, "))")))
             ## set old dir
             if (!is.null(dir)) {
                 dirold <- lapply(dirold, function(z) paste("setwd(\"", z, "\")", sep=""))
@@ -80,7 +84,7 @@ cleanup = TRUE, unload = FALSE, envir = .GlobalEnv, ...)
         }
     } else {
 ## multicore
-        require(parallel)
+        #require(parallel)
         if (balancing == "load") {
             balancing <- "none"
             warning("forking is used: balancing type was set to 'none'")

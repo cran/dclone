@@ -14,7 +14,7 @@ parallel.inits(inits, n.chains)
 }
 \arguments{
   \item{inits}{
-Initial vaues (see Initialization at \code{\link[rjags]{jags.model}}). 
+Initial values (see Initialization at \code{\link[rjags]{jags.model}}). 
 If \code{NULL}, an empty list of length \code{n.chains}
 will be generated and seeded (RNG type and seed).
 }
@@ -34,7 +34,7 @@ the \code{"lecuyer::RngStream"} factory, otherwise those are based on
 the \code{"base::BaseRNG"} factory.
 }
 \value{
-Returns a list of inital values with RNGs.
+Returns a list of initial values with RNGs.
 }
 \author{
 Peter Solymos, \email{solymos@ualberta.ca}. Based on Martyn Plummer's 
@@ -51,6 +51,7 @@ parallel functions that do initialization:
 \code{\link{dc.parfit}}
 }
 \examples{
+if (require(rjags)) {
 ## "base::BaseRNG" factory.
 parallel.inits(NULL, 2)
 ## "lecuyer::RngStream" factory
@@ -62,5 +63,6 @@ parallel.inits(list(a=0), 2)
 parallel.inits(list(list(a=0), list(a=0)), 2)
 parallel.inits(function() list(a=0), 2)
 parallel.inits(function(chain) list(a=chain), 2)
+}
 }
 \keyword{ utilities }

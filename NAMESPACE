@@ -1,6 +1,6 @@
 ## main dclone functions
-export("dclone", "dcdim", "dciid",
-       "jags.fit", "bugs.fit", "dc.fit",
+export("dclone", "dcdim", "dciid", "dctr",
+       "jags.fit", "bugs.fit", "dc.fit", ".dcFit",
        "clean.jags.model", "write.jags.model", "custommodel",
        "updated.model",
        "dcsd",
@@ -14,8 +14,9 @@ export("dclone", "dcdim", "dciid",
 ## rjags remakes
 export("jagsModel", "codaSamples")
 ## parallel functions
-export("jags.parfit", "dc.parfit",
+export("jags.parfit", "dc.parfit", "bugs.parfit",
        "snowWrapper", 
+       "parDosa",
        "clusterSize", "plotClusterSize",
        "clusterSplitSB", 
        "parLapplySB", "parLapplySLB",
@@ -26,6 +27,12 @@ export("jags.parfit", "dc.parfit",
 export("parListModules", "parLoadModule", "parUnloadModule",
       "parListFactories", "parSetFactory", 
       "parJagsModel", "parUpdate", "parCodaSamples")
+## DcloneEnv
+export(pullDcloneEnv,
+    pushDcloneEnv,
+    clearDcloneEnv,
+    listDcloneEnv,
+    existsDcloneEnv)
 ## graphical helper functions
 export("errlines")
 
@@ -40,6 +47,7 @@ export(dcsd.mcmc.list,
         coef.mcmc.list, 
         confint.mcmc.list.dc, 
         vcov.mcmc.list.dc, 
+        vcov.mcmc.list, 
         quantile.mcmc.list, 
         dclone.default, 
         dclone.list, 
@@ -59,7 +67,8 @@ export(dcsd.mcmc.list,
         update.mcmc.list,
         stack.mcmc.list,
         lambdamax.diag.mcmc.list,
-        chisq.diag.mcmc.list)
+        chisq.diag.mcmc.list,
+        as.mcmc.list.bugs)
 
 ## register methods for main dclone functions/classes
 S3method("nclones", "default")

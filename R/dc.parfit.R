@@ -15,11 +15,11 @@ n.chains = 3, partype = c("balancing", "parchains", "both"), ...)
     }
     ## parallel evaluation starts here
     flavour <- match.arg(flavour)
-    ## stop if rjags not found
-    if (flavour=="jags" && !suppressWarnings(require(rjags)))
-        stop("there is no package called 'rjags'")
-    if (!is.null(list(...)$updated.model))
+    if (flavour=="jags" && !is.null(list(...)$updated.model))
         stop("'updated.model' argument is not available for parallel computations")
+    if (flavour=="bugs" && !is.null(list(...)$format))
+        if (list(...)$format == "bugs")
+            stop("format='bugs' is not available for parallel computations")
     ## get parallel type
     partype <- match.arg(partype)
     ## some arguments are ignored with size balancing
@@ -29,14 +29,19 @@ n.chains = 3, partype = c("balancing", "parchains", "both"), ...)
         if (!is.null(update))
             warnings("'update' argument is ignored when partype != 'parchains'")
     }
-    if (partype != "balancing" && flavour == "bugs")
-        stop("flavour='bugs' supported for 'balancing' type only")
+
+#    if (partype != "balancing" && flavour == "bugs")
+#        stop("flavour='bugs' supported for 'balancing' type only")
+
+    ## this is bugs.fit/parfit argument
+    PROGRAM <- list(...)$program
+
     if (length(n.clones) < 2 && partype=="balancing") {
         warnings("no need for parallel computing with 'balancing'")
     }
     ## multiple parallel chains
     if (partype == "parchains") {
-        mod <- dclone:::.dcFit(data, params, model, inits, n.clones, 
+        mod <- dclone::.dcFit(data, params, model, inits, n.clones, 
             multiply=multiply, unchanged=unchanged, 
             update=update, updatefun=updatefun, 
             initsfun=initsfun, flavour = flavour, 
@@ -106,11 +111,11 @@ n.chains = 3, partype = c("balancing", "parchains", "both"), ...)
             "size" else "both"
         dir <- if (inherits(cl, "SOCKcluster"))
             getwd() else NULL
-       ## size balancing
+        ## size balancing
         if (partype == "balancing") {
             ## parallel function
             dcparallel <- function(i, ...) {
-                cldata <- as.list(get(".DcloneEnv", envir=.GlobalEnv))
+                cldata <- pullDcloneEnv("cldata", type = "model")
                 jdat <- dclone(cldata$data, i, multiply=cldata$multiply, 
                     unchanged=cldata$unchanged)
                 INITS <- if (!is.null(cldata$initsfun) && !cldata$INIARGS)
@@ -125,15 +130,26 @@ n.chains = 3, partype = c("balancing", "parchains", "both"), ...)
                 vn <- varnames(mod)
                 params.diag <- vn[unlist(lapply(cldata$params.diag, grep, x=vn))]
                 if (i == max(k))
-                    return(mod) else return(list(dct=dclone:::extractdctable(mod), 
-                        dcd=dclone:::extractdcdiag(mod[,params.diag])))
-#                        dcd=dclone:::extractdcdiag(mod)))
+                    return(mod) else return(list(dct=dclone::extractdctable(mod), 
+                        dcd=dclone::extractdcdiag(mod[,params.diag])))
             }
-            LIB <- if (flavour == "jags")
-                c("dclone", "rjags") else "dclone"
-            pmod <- snowWrapper(cl, k, dcparallel, cldata, name=NULL, use.env=TRUE,
+            if (flavour == "jags") {
+                LIB <- c("dclone", "rjags") 
+            } else {
+                LIB <- "dclone"
+                if (is.null(PROGRAM))
+                    PROGRAM <- "winbugs"
+                if (PROGRAM == "winbugs")
+                    LIB <- c(LIB, "R2WinBUGS")
+                if (PROGRAM == "brugs")
+                    LIB <- c(LIB, "R2WinBUGS", "BRugs")
+                if (PROGRAM == "openbugs")
+                    LIB <- c(LIB, "R2OpenBUGS")
+            }
+            pmod <- parDosa(cl, k, dcparallel, cldata, 
                 lib=LIB, balancing=balancing, size=k, 
-                rng.type=getOption("dcoptions")$RNG, cleanup=TRUE, dir=dir, unload=TRUE, ...)
+                rng.type=getOption("dcoptions")$RNG, 
+                cleanup=TRUE, dir=dir, unload=FALSE, ...)
             mod <- pmod[[times]]
             ## dctable
             dct <- lapply(1:(times-1), function(i) pmod[[i]]$dct)
@@ -147,41 +163,41 @@ n.chains = 3, partype = c("balancing", "parchains", "both"), ...)
         ## balancing+parchains
         } else {
             ## RNG and initialization
-                if (inherits(cl, "cluster") && "lecuyer" %in% list.modules()) {
-                    mod <- parListModules(cl)
-                    for (i in 1:length(mod)) {
-                        if (!("lecuyer" %in% mod[[i]]))
-                            stop("'lecuyer' module must be loaded on workers")
-                    }
+            if (inherits(cl, "cluster") && "lecuyer" %in% list.modules()) {
+                mod <- parListModules(cl)
+                for (i in 1:length(mod)) {
+                    if (!("lecuyer" %in% mod[[i]]))
+                        stop("'lecuyer' module must be loaded on workers")
                 }
+            }
             dcinits <- function(i) {
-#            dcinits <- function(i, ...) {
-#                cldata <- as.list(get(".DcloneEnv", envir=.GlobalEnv))
-#                jdat <- dclone(cldata$data, i, multiply=cldata$multiply, unchanged=cldata$unchanged)
                 INITS <- if (!is.null(cldata$initsfun) && !cldata$INIARGS)
                     initsfun(,i) else cldata$inits
                 inits <- parallel.inits(INITS, n.chains)
-#                jags.fit(data=jdat, params=cldata$params, model=cldata$model, inits=INITS,
-#                    n.adapt=0, n.update=0, n.iter=0, n.chains=cldata$n.chains)$state(internal=TRUE)
             }
             ## snowWrapper with cleanup (but cldata changes, has to be passed again)
-#            pini <- snowWrapper(cl, k, dcinits, cldata, name=NULL, use.env=TRUE,
-#                lib="dclone", balancing=balancing, size=k, 
-#                rng.type=getOption("dcoptions")$RNG, cleanup=TRUE, dir=dir, unload=FALSE, ...)
             pini <- lapply(k, dcinits)
             cldata$inits <- do.call("c", pini)
             cldata$k <- rep(k, each=n.chains)
             ## parallel function to evaluate by snowWrapper
             dcparallel <- function(i, ...) {
-                cldata <- as.list(get(".DcloneEnv", envir=.GlobalEnv))
-                jdat <- dclone(cldata$data, cldata$k[i], multiply=cldata$multiply, unchanged=cldata$unchanged)
-                jags.fit(data=jdat, params=cldata$params, model=cldata$model, 
-                    inits=cldata$inits[[i]], n.chains=1, updated.model=FALSE, ...)
+                cldata <- pullDcloneEnv("cldata", type = "model")
+                jdat <- dclone(cldata$data, cldata$k[i], 
+                    multiply=cldata$multiply, unchanged=cldata$unchanged)
+                mod <- if (flavour == "jags") {
+                    jags.fit(data=jdat, params=cldata$params, 
+                        model=cldata$model, inits=cldata$inits[[i]], 
+                        n.chains=1, updated.model=FALSE, ...)
+                } else {
+                    bugs.fit(data=jdat, params=cldata$params, 
+                        model=cldata$model, inits=cldata$inits[[i]], 
+                        n.chains=1, format="mcmc.list", ...)
+                }
             }
-            ## no dclone loaded as it is there
-            pmod <- snowWrapper(cl, 1:(times*n.chains), dcparallel, cldata, name=NULL, use.env=TRUE,
+            pmod <- parDosa(cl, 1:(times*n.chains), dcparallel, cldata, 
                 lib=c("dclone", "rjags"), balancing=balancing, size=cldata$k, 
-                rng.type=getOption("dcoptions")$RNG, cleanup=TRUE, dir=dir, unload=TRUE, ...)
+                rng.type=getOption("dcoptions")$RNG, 
+                cleanup=TRUE, dir=dir, unload=FALSE, ...)
             ## binding the chains for each k value
             assemblyfun <- function(mcmc) {
                 n.clones <- nclones(mcmc)
@@ -194,7 +210,8 @@ n.chains = 3, partype = c("balancing", "parchains", "both"), ...)
             }
             i.end <- 1:times*n.chains
             i.start <- i.end+1-n.chains
-            pmod <- lapply(1:times, function(i) assemblyfun(pmod[i.start[i]:i.end[i]]))
+            pmod <- lapply(1:times, function(i) 
+                assemblyfun(pmod[i.start[i]:i.end[i]]))
             mod <- pmod[[times]]
             ## dctable
             dct <- lapply(pmod, extractdctable)

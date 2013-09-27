@@ -2,8 +2,7 @@ parCodaSamples <-
 function(cl, model, variable.names = NULL, n.iter, thin = 1, ...) 
 {
     ## stop if rjags not found
-    if (!suppressWarnings(require(rjags)))
-        stop("there is no package called 'rjags'")
+    requireNamespace("rjags")
     cl <- evalParallelArgument(cl, quit=TRUE)
     if (!inherits(cl, "cluster"))
         stop("cl must be of class 'cluster'")
@@ -12,14 +11,15 @@ function(cl, model, variable.names = NULL, n.iter, thin = 1, ...)
     cldata <- list(variable.names=variable.names,
         n.iter=n.iter, thin=thin, name=model)
     jagsparallel <- function(i, ...) {
-        if (!exists(cldata$name, envir=.GlobalEnv))
+        cldata <- pullDcloneEnv("cldata", type = "model")
+        if (!existsDcloneEnv(cldata$name, type = "results"))
             return(NULL)
-        cldata <- as.list(get(".DcloneEnv", envir=.GlobalEnv))
-        res <- get(cldata$name, envir=.GlobalEnv)
+        res <- pullDcloneEnv(cldata$name, type = "results")
         n.clones <- nclones(res)
-        out <- coda.samples(res, variable.names=cldata$variable.names,
+        out <- rjags::coda.samples(res, variable.names=cldata$variable.names,
             n.iter=cldata$n.iter, thin=cldata$thin, ...)
-        assign(cldata$name, res, envir=.GlobalEnv)
+        ## jags model is pushed back to .env, mcmc.list is returned
+        pushDcloneEnv(cldata$name, res, type = "results")
         if (!is.null(n.clones) && n.clones > 1) {
             attr(out, "n.clones") <- n.clones
         }
@@ -27,9 +27,8 @@ function(cl, model, variable.names = NULL, n.iter, thin = 1, ...)
     }
     dir <- if (inherits(cl, "SOCKcluster")) 
         getwd() else NULL
-    res <- snowWrapper(cl, 1:length(cl), jagsparallel, cldata, 
-        name=NULL, use.env=TRUE,
-        lib = "dclone", balancing = "none", size = 1, 
+    res <- parDosa(cl, 1:length(cl), jagsparallel, cldata, 
+        lib = c("dclone", "rjags"), balancing = "none", size = 1, 
         rng.type = getOption("dcoptions")$RNG, 
         cleanup = TRUE, dir = dir, unload=FALSE, ...)
     res <- res[!sapply(res, is.null)]

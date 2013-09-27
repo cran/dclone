@@ -7,8 +7,10 @@
 \alias{dclone.environment}
 \alias{dclone.dcdim}
 \alias{dclone.dciid}
+\alias{dclone.dctr}
 \alias{dcdim}
 \alias{dciid}
+\alias{dctr}
 \title{
 Cloning R objects
 }
@@ -21,12 +23,14 @@ dclone(x, n.clones=1, ...)
 \method{dclone}{default}(x, n.clones = 1, attrib=TRUE, ...)
 \method{dclone}{dcdim}(x, n.clones = 1, attrib=TRUE, ...)
 \method{dclone}{dciid}(x, n.clones = 1, attrib=TRUE, ...)
+\method{dclone}{dctr}(x, n.clones = 1, attrib=TRUE, ...)
 \method{dclone}{list}(x, n.clones = 1, 
     multiply = NULL, unchanged = NULL, attrib=TRUE, ...)
 \method{dclone}{environment}(x, n.clones = 1, 
     multiply = NULL, unchanged = NULL, attrib=TRUE, ...)
 dcdim(x, drop = TRUE, perm = NULL)
 dciid(x, iid=character(0))
+dctr(x)
 }
 \arguments{
   \item{x}{
@@ -54,7 +58,7 @@ an array if that have only one level.
 The subscript permutation value, if the cloning dimension is not the last.
 }
   \item{iid}{
-Character (or optionaly numeric or logical).
+Character (or optionally numeric or logical).
 Column(s) to be treated as i.i.d. observations. 
 Ignored when \code{x} is a vector.
 }
@@ -71,15 +75,16 @@ because there are different ways of cloning, depending on the
 (1) Unchanged: no cloning at all (fo e.g. constants).
 
 (2) Repeat: this is the most often used cloning method, 
-repeating the observations as if there
-were more samples.
+repeating the observations row-wise as if there
+were more samples. The \code{dctr} option allows repeating
+the data column-wise.
 
 (3) Multiply: sometimes it is enough to multiply the numbers 
 (e.g. for Binomial distribution).
 
 (4) Add dimension: under specific circumstances, it is easier to 
 add another dimension for clones,
-but othervise repeat the observations (e.g. in case of time series, 
+but otherwise repeat the observations (e.g. in case of time series, 
 or for addressing special
 indexing conventions in the \code{BUGS} code, see examples 
 \code{dcdim} and \code{dclone.dcdim}).
@@ -171,5 +176,7 @@ dclone(ll, 2)
 ll$y <- rep(1:5, each=2)
 (dci <- dclone(ll, 2))
 nclones(dci)
+## repeating the data column-wise
+dclone(dctr(m), 2)
 }
 \keyword{ manip }

@@ -6,7 +6,7 @@
 Parallel computing with JAGS
 }
 \description{
-Do the same job as \code{\link[dclone]{jags.fit}}, 
+Does the same job as \code{\link[dclone]{jags.fit}}, 
 but parallel chanis are run on parallel workers, thus 
 computations can be faster (up to 1/\code{n.chains}) for long MCMC runs.
 }
@@ -15,8 +15,9 @@ jags.parfit(cl, data, params, model, inits = NULL, n.chains = 3, ...)
 }
 \arguments{
   \item{cl}{
-A cluster object created by \code{\link[snow]{makeCluster}}, or
-an integer. It can also be \code{NULL}, see \code{\link{snowWrapper}}.
+A cluster object created by \code{\link[parallel]{makeCluster}}, or
+an integer, see \code{\link{parDosa}} and 
+\code{\link{evalParallelArgument}}.
 }
   \item{data}{
 A named list or environment containing the data. If an environment, 
@@ -27,7 +28,8 @@ Character vector of parameters to be sampled.
 }
   \item{model}{
 Character string (name of the model file), a function 
-containing the model, or a or \code{\link{custommodel}} object (see Examples).
+containing the model, or a or \code{\link{custommodel}} 
+object (see Examples).
 }
   \item{inits}{
 Specification of initial values in the form of a 
@@ -39,10 +41,11 @@ cluster as \code{cl}, the function must be self containing, i.e.
 not having references to R objects outside of the
 function, or the objects should be exported with 
 \code{\link{clusterExport}} before calling \code{jags.parfit}.
-FOrking type parallelism does not require such attention.
+Forking type parallelism does not require such attention.
 }
   \item{n.chains}{
-Number of chains to generate, must be higher than 1. Ideally, this is equal to the number of parallel workers in the cluster.
+Number of chains to generate, must be higher than 1. Ideally, 
+this is equal to the number of parallel workers in the cluster.
 }
   \item{...}{
 Other arguments passed to \code{\link[dclone]{jags.fit}}.
@@ -51,12 +54,6 @@ Other arguments passed to \code{\link[dclone]{jags.fit}}.
 \details{
 Chains are run on parallel workers, 
 and the results are combined in the end.
-
-After parallel computations, temporary objects passed to workers and
-the dclone package is cleaned up. It is not guaranteed
-that objects already on the workers and independently loaded packages
-are not affected. Best to start new instances beforehand
-if \code{cl} argument is a 'snow' type cluster.
 
 No update method is available for parallel \code{mcmc.list} objects.
 See \code{\link{parUpdate}} and related parallel functions
@@ -85,12 +82,13 @@ Function for stepwise modeling with JAGS: \code{\link{parJagsModel}},
 }
 \examples{
 \dontrun{
+if (require(rjags)) {
 set.seed(1234)
 n <- 20
 x <- runif(n, -1, 1)
 X <- model.matrix(~x)
 beta <- c(2, -1)
-mu <- X \%*\% beta
+mu <- crossprod(t(X), beta)
 Y <- rpois(n, exp(mu))
 glm.model <- function() {
     for (i in 1:n) {
@@ -104,7 +102,7 @@ glm.model <- function() {
 dat <- list(Y=Y, X=X, n=n, np=ncol(X))
 load.module("glm")
 m <- jags.fit(dat, "beta", glm.model)
-cl <- makeCluster(3, type = "SOCK")
+cl <- makePSOCKcluster(3)
 ## load glm module
 tmp <- clusterEvalQ(cl, library(dclone))
 parLoadModule(cl, "glm")
@@ -133,13 +131,16 @@ clusterExport(cl, "fun")
 ## using the L'Ecuyer module with 6 chains
 load.module("lecuyer")
 parLoadModule(cl,"lecuyer")
-pm4 <- jags.parfit(cl, dat, "beta", glm.model, inits,
+pm5 <- jags.parfit(cl, dat, "beta", glm.model, inits,
     n.chains=6)
-nchain(pm4)
+nchain(pm5)
+unload.module("lecuyer")
+parUnloadModule(cl,"lecuyer")
 stopCluster(cl)
 ## multicore type forking
 if (.Platform$OS.type != "windows") {
-pm5 <- jags.parfit(3, dat, "beta", glm.model)
+pm6 <- jags.parfit(3, dat, "beta", glm.model)
+}
 }
 }
 }

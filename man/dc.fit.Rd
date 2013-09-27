@@ -38,7 +38,7 @@ If missing, will be treated as \code{NULL} and initial values will
 be generated automatically.
 }
   \item{n.clones}{
-An integer vector containing the numbers of clones to use itaratively.
+An integer vector containing the numbers of clones to use iteratively.
 }
   \item{multiply}{
 Numeric or character index for list element(s) in the \code{data} 
@@ -133,7 +133,7 @@ sigma <- 0.1
 alpha <- rnorm(n, 0, sigma)
 x <- runif(n)
 X <- model.matrix(~x)
-linpred <- X \%*\% beta + alpha
+linpred <- crossprod(t(X), beta) + alpha
 Y <- rpois(n, exp(linpred))
 ## JAGS model as a function
 jfun1 <- function() {
@@ -225,7 +225,7 @@ mod <- dc.fit(dat, c("lambda","beta","sigma"), beverton.holt,
 summary(mod)
 
 ## Using WinBUGS/OpenBUGS
-if (.Platform$OS.type == "windows") {
+library(R2WinBUGS)
 data(schools)
 dat <- list(J = nrow(schools), y = schools$estimate, 
     sigma.y = schools$sd)
@@ -244,11 +244,21 @@ inits <- function(){
          sigma.theta=runif(1, 0, 100))
 }
 param <- c("mu.theta", "sigma.theta")
+if (.Platform$OS.type == "windows") {
 sim2 <- dc.fit(dat, param, bugs.model, n.clones=1:2, 
-    flavour="bugs", program="WinBUGS", multiply="J")
-sim3 <- dc.fit(dat, param, bugs.model, n.clones=1:2, 
-    flavour="bugs", program="OpenBUGS", multiply="J")
+    flavour="bugs", program="WinBUGS", multiply="J",
+    n.iter=2000, n.thin=1)
+summary(sim2)
 }
+sim3 <- dc.fit(dat, param, bugs.model, n.clones=1:2, 
+    flavour="bugs", program="brugs", multiply="J",
+    n.iter=2000, n.thin=1)
+summary(sim3)
+library(R2OpenBUGS)
+sim4 <- dc.fit(dat, param, bugs.model, n.clones=1:2, 
+    flavour="bugs", program="openbugs", multiply="J",
+    n.iter=2000, n.thin=1)
+summary(sim4)
 }
 }
 \keyword{ models }
