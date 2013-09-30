@@ -10,8 +10,9 @@ function(cl, data, params, model, inits = NULL, n.chains = 3, ...)
     }
     ## parallel evaluation starts here
     ## stop if rjags not found
-    if (!suppressWarnings(require(rjags)))
-        stop("there is no package called 'rjags'")
+    requireNamespace("rjags")
+    if (inherits(cl, "cluster"))
+        clusterEvalQ(cl, requireNamespace("rjags"))
     if (is.environment(data)) {
         warnings("'data' was environment: it was coerced into a list")
         data <- as.list(data)
@@ -50,7 +51,7 @@ function(cl, data, params, model, inits = NULL, n.chains = 3, ...)
     cldata <- list(data=data, params=params, model=model, inits=inits)
     ## parallel function to evaluate by snowWrapper
     jagsparallel <- function(i, ...)   {
-        cldata <- as.list(get(".DcloneEnv", envir=.GlobalEnv))
+        cldata <- pullDcloneEnv("cldata", type = "model")
         jags.fit(data=cldata$data, params=cldata$params, 
             model=cldata$model, 
             inits=cldata$inits[[i]], n.chains=1, updated.model=FALSE, ...)
@@ -64,8 +65,7 @@ function(cl, data, params, model, inits = NULL, n.chains = 3, ...)
         "load" else "none"
     dir <- if (inherits(cl, "SOCKcluster"))
         getwd() else NULL
-    mcmc <- snowWrapper(cl, 1:n.chains, jagsparallel, cldata, 
-        name=NULL, use.env=TRUE,
+    mcmc <- parDosa(cl, 1:n.chains, jagsparallel, cldata, 
         lib=c("dclone","rjags"), balancing=balancing, size=1, 
         rng.type=getOption("dcoptions")$RNG, cleanup=TRUE, dir=dir, 
         unload=FALSE, ...)

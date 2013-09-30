@@ -11,7 +11,7 @@ Write and remove model file
 Writes or removes a BUGS model file to or from the hard drive.
 }
 \usage{
-write.jags.model(model, filename = "model.bug", digits = 5,
+write.jags.model(model, filename = "model.txt", digits = 5,
     dir = getwd(), overwrite = getOption("dcoptions")$overwrite)
 clean.jags.model(filename = "model.bug", dir = getwd())
 custommodel(model, exclude = NULL, digits = 5)
@@ -102,7 +102,7 @@ alpha <- 1
 beta <- -1
 sigma <- 0.5
 x <- runif(N)
-linpred <- model.matrix(~x) \%*\% c(alpha, beta)
+linpred <- crossprod(t(model.matrix(~x)), c(alpha, beta))
 Y <- rnorm(N, mean = linpred, sd = sigma)
 ## list of data for the model
 jdata <- list(N = N, Y = Y, x = x)

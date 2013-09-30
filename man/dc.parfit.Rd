@@ -18,8 +18,9 @@ dc.parfit(cl, data, params, model, inits, n.clones,
 }
 \arguments{
   \item{cl}{
-A cluster object created by \code{\link[snow]{makeCluster}}, or
-an integer. It can also be \code{NULL}, see \code{\link{snowWrapper}}.
+A cluster object created by \code{\link[parallel]{makeCluster}}, or
+an integer, see \code{\link{parDosa}} and 
+\code{\link{evalParallelArgument}}.
 }
   \item{data}{
 A named list (or environment) containing the data.
@@ -47,7 +48,7 @@ function, or the objects should be exported with
 \code{\link{clusterExport}} before calling \code{dc.parfit}.
 }
   \item{n.clones}{
-An integer vector containing the numbers of clones to use itaratively.
+An integer vector containing the numbers of clones to use iteratively.
 }
   \item{multiply}{
 Numeric or character index for list element(s) in the \code{data} 
@@ -60,7 +61,7 @@ argument to be left unchanged.
   \item{update}{
 Numeric or character index for list element(s) in the \code{data} 
 argument that has to be updated by \code{updatefun} in each iterations. 
-This usually is for making priors more informative, and anhancing 
+This usually is for making priors more informative, and enhancing 
 convergence.
 This argument is ignored if size balancing is used (default), and not
 ignored when multiple parallel chains are used.
@@ -129,7 +130,7 @@ the workers, the option \code{"dclone.LB"} should be set to \code{TRUE}
  By default, the \code{"dclone.LB"}
 option is \code{FALSE} for reproducibility reasons.
 
-Some arguments from \code{\link{dc.fit}} are not availabe in parallel 
+Some arguments from \code{\link{dc.fit}} are not available in parallel 
 version (\code{update}, \code{updatefun}, \code{initsfun}) 
 when size balancing is used 
 (\code{partype} is \code{"balancing"} or \code{"both"}).
@@ -138,7 +139,7 @@ These arguments are evaluated only when \code{partype="parchains"}.
 Size balancing is recommended if \code{n.clones} is a relatively long 
 vector, while parallel chains might be more efficient when 
 \code{n.clones} has few elements.
-For efficnecy reasons, a combination of the two 
+For efficiency reasons, a combination of the two 
 (\code{partype="both"}) is preferred if cluster size allows it.
 
 Only \code{partype="balancing"} is available for \code{flavour="bugs"}.
@@ -184,7 +185,7 @@ n <- 20
 x <- runif(n, -1, 1)
 X <- model.matrix(~x)
 beta <- c(2, -1)
-mu <- X \%*\% beta
+mu <- crossprod(t(X), beta)
 Y <- rpois(n, exp(mu))
 glm.model <- function() {
     for (i in 1:n) {
@@ -230,7 +231,7 @@ mcdcm3 <- dc.parfit(3, dat, "beta", glm.model, n.clones=k,
 }
 
 ## Using WinBUGS/OpenBUGS
-if (.Platform$OS.type == "windows") {
+library(R2WinBUGS)
 data(schools)
 dat <- list(J = nrow(schools), y = schools$estimate, 
     sigma.y = schools$sd)
@@ -250,12 +251,22 @@ inits <- function(){
 }
 param <- c("mu.theta", "sigma.theta")
 cl <- makePSOCKcluster(2)
+if (.Platform$OS.type == "windows") {
 sim2 <- dc.parfit(cl, dat, param, bugs.model, n.clones=1:2, 
-    flavour="bugs", program="WinBUGS", multiply="J")
-sim3 <- dc.parfit(cl, dat, param, bugs.model, n.clones=1:2, 
-    flavour="bugs", program="OpenBUGS", multiply="J")
-stopCluster(cl)
+    flavour="bugs", program="WinBUGS", multiply="J",
+    n.iter=2000, n.thin=1)
+summary(sim2)
 }
+sim3 <- dc.parfit(cl, dat, param, bugs.model, n.clones=1:2, 
+    flavour="bugs", program="brugs", multiply="J",
+    n.iter=2000, n.thin=1)
+summary(sim3)
+library(R2OpenBUGS)
+sim4 <- dc.parfit(cl, dat, param, bugs.model, n.clones=1:2, 
+    flavour="bugs", program="openbugs", multiply="J",
+    n.iter=2000, n.thin=1)
+summary(sim4)
+stopCluster(cl)
 
 ## simulation for Poisson GLMM with inits
 set.seed(1234)
@@ -265,7 +276,7 @@ sigma <- 0.1
 alpha <- rnorm(n, 0, sigma)
 x <- runif(n)
 X <- model.matrix(~x)
-linpred <- X \%*\% beta + alpha
+linpred <- crossprod(t(X), beta) + alpha
 Y <- rpois(n, exp(linpred))
 ## JAGS model as a function
 jfun1 <- function() {

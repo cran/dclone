@@ -3,8 +3,7 @@ function(object, fun, times = 1, n.update = 0,
 n.iter, thin, ...)
 {
     ## stop if rjags not found
-    if (!suppressWarnings(require(rjags)))
-        stop("there is no package called 'rjags'")
+    requireNamespace("rjags")
     ## eval of args
     if (is.null(updated.model(object)))
         stop("updated model not found")
@@ -24,9 +23,9 @@ n.iter, thin, ...)
     params <- varnames(mod)
     ## missing args
     if (missing(thin))
-        thin <- coda:::thin(object)
+        thin <- coda::thin(object)
     if (missing(n.iter))
-        n.iter <- niter(object) * coda:::thin(object)
+        n.iter <- niter(object) * coda::thin(object)
     ## n.update/n.iter vs. times
     if (length(n.update) < times)
         n.update <- rep(n.update, times)[1:times]
