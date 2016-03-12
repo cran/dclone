@@ -175,11 +175,11 @@ n.chains = 3, partype = c("balancing", "parchains", "both"), ...)
                     initsfun(,i) else cldata$inits
                 inits <- parallel.inits(INITS, n.chains)
             }
-            ## snowWrapper with cleanup (but cldata changes, has to be passed again)
+            ## parDosa with cleanup (but cldata changes, has to be passed again)
             pini <- lapply(k, dcinits)
             cldata$inits <- do.call("c", pini)
             cldata$k <- rep(k, each=n.chains)
-            ## parallel function to evaluate by snowWrapper
+            ## parallel function to evaluate by parDosa
             dcparallel <- function(i, ...) {
                 cldata <- pullDcloneEnv("cldata", type = "model")
                 jdat <- dclone(cldata$data, cldata$k[i], 

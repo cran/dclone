@@ -42,12 +42,12 @@ mechanism.
 
 \code{\link[parallel]{mclapply}} is used unmodified 
 if sizes of the jobs are equal (\code{length(unique(size)) == 1}).
-Size balancing (as described in \code{\link{snowWrapper}})
+Size balancing (as described in \code{\link{parDosa}})
 is used to balance workload on the child processes
 otherwise.
 }
 \seealso{
-  \code{\link[parallel]{mclapply}}, \code{\link{snowWrapper}}
+  \code{\link[parallel]{mclapply}}, \code{\link{parDosa}}
 }
 \author{Peter Solymos}
 \keyword{interface}
