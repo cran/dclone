@@ -2,7 +2,8 @@
 function(data, params, model, inits, n.clones, multiply = NULL, unchanged = NULL,
 update = NULL, updatefun = NULL, initsfun = NULL,
 flavour = c("jags", "bugs", "stan"),
-n.chains=3, cl = NULL, parchains = FALSE, return.all=FALSE, ...)
+n.chains=3, cl = NULL, parchains = FALSE, return.all=FALSE,
+check.nclones = TRUE, ...)
 {
     flavour <- match.arg(flavour)
     ## initail evals
@@ -15,8 +16,12 @@ n.chains=3, cl = NULL, parchains = FALSE, return.all=FALSE, ...)
         data <- as.list(data)
     }
     ## determine k
-    k <- n.clones[order(n.clones)]
-    k <- unique(k)
+    if (check.nclones) {
+        k <- n.clones[order(n.clones)]
+        k <- unique(k)
+    } else {
+        k <- n.clones
+    }
     times <- length(k)
     rhat.crit <- getOption("dcoptions")$rhat
     trace <- getOption("dcoptions")$verbose
@@ -110,9 +115,17 @@ n.chains=3, cl = NULL, parchains = FALSE, return.all=FALSE, ...)
         }
         ## updating
         if (i < times) {
-            if (!is.null(update))
-                jdat[[update]] <- if (UPARGS)
+            if (!is.null(update)) {
+                jdatUp <- if (UPARGS)
                     updatefun(mod) else updatefun(mod, k[i+1])
+                if (length(update) > 1L) {
+                    if (!is.list(jdatUp))
+                        stop("updatefun must return a named list when length(update) > 1")
+                    jdat[update] <- jdatUp[update]
+                } else {
+                    jdat[[update]] <- jdatUp
+                }
+            }
             if (!is.null(initsfun))
                 inits <- if (INIARGS)
                     initsfun(mod) else initsfun(mod, k[i+1])
