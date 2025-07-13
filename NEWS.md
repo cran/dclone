@@ -1,5 +1,10 @@
 # dclone package version history
 
+## Version 2.3-3, July 12, 2025
+
+* Use Authors@R field in DESCRIPTION.
+* Fix documentation.
+
 ## Version 2.3-2, July 2, 2023
 
 * Updated CITATION file using bibentry() as per CRAN request.
